@@ -83,14 +83,11 @@ class ComponentPage extends DemoPage {
     const allowed = ['CodeMirror', 'Monaco'];
     const valueRaw = window.localStorage.getItem(editorKey);
     if (!allowed.includes(valueRaw)) {
-      this.loadMonaco();
       return;
     }
     this.editorType = valueRaw;
     if (valueRaw === 'CodeMirror') {
       await this.loadCodeMirror();
-    } else {
-      this.loadMonaco();
     }
   }
 
@@ -138,28 +135,6 @@ class ComponentPage extends DemoPage {
       const s = document.getElementsByTagName('script')[0];
       s.parentNode.insertBefore(script, s);
     });
-  }
-
-  loadMonaco() {
-    // @ts-ignore
-    window.MonacoEnvironment = {
-      getWorker: (moduleId, label) => {
-        let url;
-        const prefix = '../node_modules/monaco-editor/esm/vs/';
-        const langPrefix = `${prefix}language/`;
-        switch (label) {
-          case 'json': url = `${langPrefix}json/json.worker.js`; break;
-          case 'css': url = `${langPrefix}css/css.worker.js`; break;
-          case 'html': url = `${langPrefix}html/html.worker.js`; break;
-          case 'javascript':
-          case 'typescript': url = `${langPrefix}typescript/ts.worker.js`; break;
-          default: url = `${prefix}editor/editor.worker.js`; break;
-        }
-        return new Worker(url, {
-          type: 'module'
-        });
-      }
-    }
   }
 
   /**

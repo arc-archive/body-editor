@@ -4,9 +4,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
-  <title>Body editor</title>
+  <title>Body protocol buffer editor</title>
+  <script src="../node_modules/protobufjs/dist/protobuf.js"></script>
   <style>
-  .centered[role="main"] {
+  [role="main"].centered[role="main"] {
     max-width: 1400px;
   }
 
@@ -31,43 +32,16 @@
     --anypoint-input-background-color: var(--inputs-background-color);
   }
 
-  body-editor {
+  body-protobuf-editor {
     flex: 1;
-  }
-
-  .url-input {
-    width: 100%;
-    padding: 4px 12px;
   }
   .monaco-aria-container{position:absolute;left:-999em};
   </style>
-  <script>
-    // @ts-ignore
-    window.MonacoEnvironment = {
-      getWorker: (moduleId, label) => {
-        console.log('aaaaaaaaaaaaaaaaaaaa', moduleId, label);
-        let url;
-        const prefix = '../node_modules/monaco-editor/esm/vs/';
-        const langPrefix = `${prefix}language/`;
-        switch (label) {
-          case 'json': url = `${langPrefix}json/json.worker.js`; break;
-          case 'css': url = `${langPrefix}css/css.worker.js`; break;
-          case 'html': url = `${langPrefix}html/html.worker.js`; break;
-          case 'javascript':
-          case 'typescript': url = `${langPrefix}typescript/ts.worker.js`; break;
-          default: url = `${prefix}editor/editor.worker.js`; break;
-        }
-        return new Worker(url, {
-          type: 'module'
-        });
-      }
-    }
-  </script>
 </head>
 
 <body>
   <div id="demo"></div>
-  <script type="module" src="body-editor.js"></script>
+  <script type="module" src="protobuf.js"></script>
 </body>
 
 </html>

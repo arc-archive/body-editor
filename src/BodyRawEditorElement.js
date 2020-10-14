@@ -13,12 +13,11 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
 */
-import { LitElement, html } from 'lit-element';
-import * as monaco from 'monaco-editor/esm/vs/editor/editor.api.js';
+import * as monaco from 'monaco-editor/esm/vs/editor/editor.main.js';
 import { RequestEvents } from '@advanced-rest-client/arc-events';
 import elementStyles from './styles/BodyEditor.styles.js';
 import monacoStyles from './styles/Monaco.styles.js';
-
+import { MonacoBase } from './MonacoBase.js';
 import {
   valueValue,
   monacoInstance,
@@ -30,46 +29,21 @@ import {
   valueChanged,
   changeTimeout,
   notifyChange,
-  generateMonacoTheme,
-  generateEditorConfig,
 } from './internals.js';
 
-export class BodyRawEditorElement extends LitElement {
+export class BodyRawEditorElement extends MonacoBase {
   static get styles() {
     return [elementStyles, monacoStyles];
   }
 
   static get properties() {
     return {
-      /**
-       * A HTTP body.
-       */
-      value: { type: String },
-      /**
-       * When set the editor is in read only mode.
-       */
-      readOnly: { type: Boolean },
-      /**
-       * When set all controls are disabled in the form
-       */
-      disabled: { type: Boolean },
+      ...super.properties,
       /** 
        * Uses the current content type to detect language support.
        */
       contentType: { type: String },
     };
-  }
-
-  get value() {
-    return this[valueValue];
-  }
-
-  set value(value) {
-    const old = this[valueValue];
-    if (old === value) {
-      return;
-    }
-    this[valueValue] = value;
   }
 
   get contentType() {
@@ -91,28 +65,10 @@ export class BodyRawEditorElement extends LitElement {
     this[setLanguage](lang);
   }
 
-  /**
-   * @returns {monaco.editor.IStandaloneCodeEditor}
-   */
-  get editor() {
-    return this[monacoInstance];
-  }
-
-  constructor() {
-    super();
-    this[valueValue] = '';
-    this.readOnly = false;
-    this.disabled = false;
-
-    this[valueChanged] = this[valueChanged].bind(this);
-  }
 
   firstUpdated() {
-    const config = this[generateEditorConfig]();
-    const instance = monaco.editor.create(this.shadowRoot.querySelector('#container'), config);
-    instance.onDidChangeModelContent(this[valueChanged]);
-    this[monacoInstance] = instance;
-    this[setupActions](instance);
+    super.firstUpdated();
+    this[setupActions](this[monacoInstance]);
   }
 
   /**
@@ -183,61 +139,5 @@ export class BodyRawEditorElement extends LitElement {
     this[changeTimeout] = window.requestAnimationFrame(() => {
       this[notifyChange]();
     });
-  }
-
-  [notifyChange]() {
-    this.dispatchEvent(new CustomEvent('change'));
-  }
-
-  [generateMonacoTheme]() {
-    let bgColor = getComputedStyle(document.body).getPropertyValue('--code-editor-color').trim();
-    if (!bgColor) {
-      bgColor = '#F5F5F5';
-    }
-    const theme = {
-      base: 'vs', 
-      inherit: true,
-      rules: [{ background: bgColor }],
-      colors: {
-        "editor.background": bgColor,
-      },
-    };
-    // @ts-ignore
-    monaco.editor.defineTheme('ArcTheme', theme);
-  }
-
-  /**
-   * Generates Monaco configuration
-   * @returns {monaco.editor.IStandaloneEditorConstructionOptions}
-   */
-  [generateEditorConfig]() {
-    const { value='', readOnly, disabled } = this;
-    const language = this[languageValue];
-
-    const config = /** monaco.editor.IStandaloneEditorConstructionOptions */ ({
-      minimap: {
-        enabled: false,
-      },
-      readOnly: readOnly || disabled,
-      formatOnType: true,
-      folding: true,
-      tabSize: 2,
-      detectIndentation: true,
-      value,
-    });
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      config.theme = "vs-dark";
-    } else {
-      this[generateMonacoTheme]();
-      config.theme = 'ArcTheme';
-    }
-    if (language) {
-      config.language = language;
-    }
-    return config;
-  }
-  
-  render() {
-    return html`<div id="container"></div>`;
   }
 }
