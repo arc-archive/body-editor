@@ -14,6 +14,7 @@ import {
   notifyChange,
   generateMonacoTheme,
   generateEditorConfig,
+  setEditorConfigProperty,
 } from './internals.js';
 
 export class BodyRawEditorElement extends LitElement {
@@ -28,12 +29,7 @@ export class BodyRawEditorElement extends LitElement {
    * When set the editor is in read only mode.
    * @attribute
    */
-  readOnly: string;
-  /**
-   * When set all controls are disabled in the form
-   * @attribute
-   */
-  disabled: string;
+  readOnly: boolean;
   /** 
    * Uses the current content type to detect language support.
    * @attribute
@@ -78,6 +74,8 @@ export class BodyRawEditorElement extends LitElement {
    * Generates Monaco configuration
    */
   [generateEditorConfig](): monaco.editor.IStandaloneEditorConstructionOptions;
+
+  [setEditorConfigProperty](prop: keyof monaco.editor.IEditorOptions, value: any): void;
   
   render(): TemplateResult;
 }

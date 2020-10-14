@@ -14,14 +14,18 @@ module.exports = (config) => {
         {
           pattern: config.grep ? config.grep : 'test/**/*.test.js',
           type: 'module'
-        }
+        },
+        // {
+        //   pattern: 'node_modules/monaco-editor/esm/vs/language/typescript/ts.worker.js',
+        //   type: 'module'
+        // },
       ],
 
       // see the karma-esm docs for all options
       esm: {
         // if you are using 'bare module imports' you will need this option
         nodeResolve: true,
-        coverageExclude: ['src/lib/Prism*.js'],
+        // coverageExclude: ['src/lib/Prism*.js'],
       }
     })
   );

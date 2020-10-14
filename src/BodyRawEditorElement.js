@@ -14,10 +14,12 @@ License for the specific language governing permissions and limitations under
 the License.
 */
 import { LitElement, html } from 'lit-element';
-import * as monaco from 'monaco-editor/esm/vs/editor/editor.api.js';
+import * as monaco from 'monaco-editor'; // /esm/vs/editor/editor.main.js
 import { RequestEvents } from '@advanced-rest-client/arc-events';
 import elementStyles from './styles/BodyEditor.styles.js';
 import monacoStyles from './styles/Monaco.styles.js';
+
+/* @typedef {import('monaco-editor')} monaco */
 
 import {
   valueValue,
@@ -32,6 +34,8 @@ import {
   notifyChange,
   generateMonacoTheme,
   generateEditorConfig,
+  readOnlyValue,
+  setEditorConfigProperty,
 } from './internals.js';
 
 export class BodyRawEditorElement extends LitElement {
@@ -49,10 +53,6 @@ export class BodyRawEditorElement extends LitElement {
        * When set the editor is in read only mode.
        */
       readOnly: { type: Boolean },
-      /**
-       * When set all controls are disabled in the form
-       */
-      disabled: { type: Boolean },
       /** 
        * Uses the current content type to detect language support.
        */
@@ -91,6 +91,19 @@ export class BodyRawEditorElement extends LitElement {
     this[setLanguage](lang);
   }
 
+  get readOnly() {
+    return this[readOnlyValue];
+  }
+
+  set readOnly(value) {
+    const old = this[readOnlyValue];
+    if (old === value) {
+      return;
+    }
+    this[readOnlyValue] = value;
+    this[setEditorConfigProperty]('readOnly', value);
+  }
+
   /**
    * @returns {monaco.editor.IStandaloneCodeEditor}
    */
@@ -101,8 +114,7 @@ export class BodyRawEditorElement extends LitElement {
   constructor() {
     super();
     this[valueValue] = '';
-    this.readOnly = false;
-    this.disabled = false;
+    this[readOnlyValue] = false;
 
     this[valueChanged] = this[valueChanged].bind(this);
   }
@@ -211,14 +223,14 @@ export class BodyRawEditorElement extends LitElement {
    * @returns {monaco.editor.IStandaloneEditorConstructionOptions}
    */
   [generateEditorConfig]() {
-    const { value='', readOnly, disabled } = this;
+    const { value='', readOnly } = this;
     const language = this[languageValue];
 
     const config = /** monaco.editor.IStandaloneEditorConstructionOptions */ ({
       minimap: {
         enabled: false,
       },
-      readOnly: readOnly || disabled,
+      readOnly,
       formatOnType: true,
       folding: true,
       tabSize: 2,
@@ -235,6 +247,21 @@ export class BodyRawEditorElement extends LitElement {
       config.language = language;
     }
     return config;
+  }
+
+  /**
+   * @param {keyof monaco.editor.IEditorOptions} prop The property to set
+   * @param {any} value
+   */
+  [setEditorConfigProperty](prop, value) {
+    const { editor } = this;
+    if (!editor) {
+      return;
+    }
+    const opts = {
+      [prop]: value,
+    };
+    editor.updateOptions(opts);
   }
   
   render() {

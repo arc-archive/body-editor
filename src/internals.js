@@ -81,3 +81,5 @@ export const mainActionsTemplate = Symbol('mainActionsTemplate');
 export const mimeTypeChangeHandler = Symbol('mimeTypeChangeHandler');
 export const generateMonacoTheme = Symbol('generateMonacoTheme');
 export const generateEditorConfig = Symbol('generateEditorConfig');
+export const readOnlyValue = Symbol('readOnlyValue');
+export const setEditorConfigProperty = Symbol('setEditorConfigProperty');
