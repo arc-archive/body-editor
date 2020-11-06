@@ -13,11 +13,6 @@ The package contains:
 
 [![Build Status](https://travis-ci.com/advanced-rest-client/body-editor.svg)](https://travis-ci.com/advanced-rest-client/body-editor)
 
-___
-
-Work in progress.
-___
-
 ## Usage
 
 ### Installation

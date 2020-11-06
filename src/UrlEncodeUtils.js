@@ -285,7 +285,9 @@ export function decodeUrlEncoded(input) {
     typed = createViewModel(String(input));
   }
   typed.forEach((obj) => {
+    // eslint-disable-next-line no-param-reassign
     obj.name = decodeQueryString(obj.name);
+    // eslint-disable-next-line no-param-reassign
     obj.value = decodeValue(obj.value);
   });
   if (isArray) {

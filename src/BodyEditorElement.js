@@ -1,3 +1,4 @@
+/* eslint-disable lit-a11y/no-autofocus */
 /* eslint-disable class-methods-use-this */
 /**
 @license
