@@ -76,6 +76,8 @@ import {
   codeMirrorChangeHandler,
   mainActionsTemplate,
   mimeTypeChangeHandler,
+  dropHandler,
+  dragOverHandler,
 } from './internals.js';
 import '../body-formdata-editor.js';
 import '../body-multipart-editor.js';
@@ -146,7 +148,6 @@ export class BodyEditorElement extends LitElement {
       model: { type: Array },
       /**
        * The currently rendered editor.
-       * - 
        */
       selected: { type: String },
       /**
@@ -287,6 +288,14 @@ export class BodyEditorElement extends LitElement {
      */
     this.model = undefined;
     this[editorTypeValue] = 'Monaco';
+    this[dropHandler] = this[dropHandler].bind(this);
+    this[dragOverHandler] = this[dragOverHandler].bind(this);
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.addEventListener('drop', this[dropHandler]);
+    this.addEventListener('dragover', this[dragOverHandler]);
   }
 
   /**
@@ -605,6 +614,45 @@ export class BodyEditorElement extends LitElement {
       return;
     }
     RequestEvents.State.contentTypeChange(this, id);
+  }
+
+  /**
+   * 
+   * @param {DragEvent} e 
+   */
+  async [dropHandler](e) {
+    e.preventDefault();
+    const { dataTransfer } = e;
+    const { files } = dataTransfer;
+    if (!files.length) {
+      return;
+    }
+    const file = files[0];
+    const { selected } = this;
+    if (selected === 'file') {
+      this.value = file;
+    } else if (selected === 'multipart') {
+      const editor = this.shadowRoot.querySelector('body-multipart-editor');
+      if (!e.ctrlKey && !e.metaKey) {
+        editor.value = new FormData();
+      }
+      const ps = Array.from(files).map((item) => editor.addFile(item));
+      await Promise.all(ps);
+    } else {
+      this.value = await PayloadProcessor.fileToString(file);
+      const { type } = file;
+      if (type) {
+        RequestEvents.State.contentTypeChange(this, type);
+      }
+    }
+    this[notifyInput]();
+  }
+
+  /**
+   * @param {DragEvent} e 
+   */
+  [dragOverHandler](e) {
+    e.preventDefault();
   }
   
   render() {

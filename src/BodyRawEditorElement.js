@@ -74,6 +74,10 @@ export class BodyRawEditorElement extends LitElement {
       return;
     }
     this[valueValue] = value;
+    const { editor } = this;
+    if (editor) {
+      editor.setValue(value || '');
+    }
   }
 
   get contentType() {

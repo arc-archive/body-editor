@@ -83,3 +83,5 @@ export const generateMonacoTheme = Symbol('generateMonacoTheme');
 export const generateEditorConfig = Symbol('generateEditorConfig');
 export const readOnlyValue = Symbol('readOnlyValue');
 export const setEditorConfigProperty = Symbol('setEditorConfigProperty');
+export const dropHandler = Symbol('dropHandler');
+export const dragOverHandler = Symbol('dragOverHandler');

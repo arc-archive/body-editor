@@ -80,6 +80,12 @@ export declare class BodyMultipartEditorElement extends LitElement {
 
   constructor();
 
+  /**
+   * Adds an instance of a file to the form data
+   * @param file 
+   */
+  addFile(file: File): Promise<void>;
+
   [notifyChange](): void;
 
   /**

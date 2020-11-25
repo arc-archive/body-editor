@@ -198,6 +198,41 @@ export class BodyMultipartEditorElement extends LitElement {
     this.autoEncode = false;
   }
 
+  /**
+   * Adds an instance of a file to the form data
+   * @param {File} file 
+   */
+  async addFile(file) {
+    if (this.readOnly || this.disabled) {
+      return;
+    }
+    const value = await PayloadProcessor.blobToString(file);
+    if (!this.model) {
+      this[modelValue] = /** @type MultipartBody[] */ ([]);
+    }
+    if (!this[internalModel]) {
+      this[internalModel] = [];
+    }
+    const { model } = this;
+    const obj = /** @type MultipartBody */ ({
+      name: file.name ||  '',
+      value,
+      enabled: true,
+      isFile: true,
+      size: file.size,
+      fileName: file.name || '',
+    });
+    model.push(obj);
+    this[internalModel].push({ ...obj, value: file });
+    const { value: form } = this;
+    if (form.has(obj.name)) {
+      form.delete(obj.name);
+    }
+    this[setFormValue](obj, file);
+    this[notifyChange]();
+    this.requestUpdate();
+  }
+
   [notifyChange]() {
     this.dispatchEvent(new CustomEvent('change'));
   }
