@@ -28,3 +28,32 @@
 * updated Travis configuration to connect to Sauce Labs [6ad6bb4](https://github.com/advanced-rest-client/body-editor/commit/6ad6bb421a90a68b8bb3d2b02f7a08b76ec79f25) by Pawel
 
 
+<a name="0.1.3"></a>
+## [0.1.3](https://github.com/advanced-rest-client/body-editor/compare/0.1.0...0.1.3) (2020-11-25)
+
+### Build
+
+* bumping version [e2c3f19](https://github.com/advanced-rest-client/body-editor/commit/e2c3f19e819d0df01e15cfaa19a59a0c19a6f257) by Pawel Psztyc
+
+
+### Update
+
+* [ci skip] automated merge master->stage. syncing main branches [df7d549](https://github.com/advanced-rest-client/body-editor/commit/df7d54901932f1e8bdc524c1ba14812451abd163) by Ci agent
+* [ci skip] automated merge master->stage. syncing main branches [3f4e399](https://github.com/advanced-rest-client/body-editor/commit/3f4e399bb13db9b2448b5665778cdfaca8c165dc) by Ci agent
+
+
+### Features
+
+* adding file drop support [8f0b171](https://github.com/advanced-rest-client/body-editor/commit/8f0b171d119c654388ce7c3fc7d22749d89cd2ac) by Pawel Psztyc
+
+
+### Bug Fixes
+
+* moving to support global monaco [67fe7b9](https://github.com/advanced-rest-client/body-editor/commit/67fe7b946be5e207aeab00f02d720ff69d361163) by Pawel Psztyc
+
+
+### Refactor
+
+* moving portion of the logic to an external module [4c5f116](https://github.com/advanced-rest-client/body-editor/commit/4c5f1162258aad9530d544bb1b4e1a2a6b4b5007) by Pawel Psztyc
+
+
