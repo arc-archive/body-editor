@@ -1,4 +1,5 @@
 import { assert } from '@open-wc/testing';
+import './monaco-loader.js';
 import { 
   encodeUrlEncoded, 
   encodeQueryString, 

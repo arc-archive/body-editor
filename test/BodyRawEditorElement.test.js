@@ -1,17 +1,20 @@
 import { assert, aTimeout, fixture, oneEvent } from '@open-wc/testing';
-import * as monaco from 'monaco-editor';
+// import * as monaco from 'monaco-editor';
 import sinon from 'sinon';
+import './monaco-loader.js';
 import '../body-raw-editor.js'
 import {
   languageValue,
   valueChanged,
 } from '../src/internals.js';
 
+/* global monaco */
+
 // @ts-ignore
 window.MonacoEnvironment = {
   getWorker: (moduleId, label) => {
     let url;
-    const prefix = '/base/node_modules/monaco-editor/esm/vs/';
+    const prefix = 'node_modules/monaco-editor/esm/vs/';
     const langPrefix = `${prefix}language/`;
     switch (label) {
       case 'json': url = `${langPrefix}json/json.worker.js`; break;
@@ -36,6 +39,17 @@ describe('BodyRawEditorElement()', () => {
   async function basicFixture() {
     return fixture(`<body-raw-editor></body-raw-editor>`);
   }
+
+  let interval;
+  before((done) => {
+    interval = setInterval(() => {
+      // @ts-ignore
+      if (window.monaco) {
+        clearInterval(interval);
+        done();
+      }
+    }, 20);
+  });
 
   describe('constructor()', () => {
     let element = /** @type BodyRawEditorElement */ (null);
@@ -65,6 +79,7 @@ describe('BodyRawEditorElement()', () => {
 
     it('sets the editor readOnly', () => {
       element.readOnly = true;
+      // @ts-ignore
       const value = element.editor.getOption(monaco.editor.EditorOptions.readOnly.id);
       assert.isTrue(value);
     });

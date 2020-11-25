@@ -1,7 +1,7 @@
 import { html } from 'lit-html';
 import { ifDefined } from 'lit-html/directives/if-defined.js';
 import { DemoPage } from '@advanced-rest-client/arc-demo-helper';
-import { DataGenerator } from '@advanced-rest-client/arc-data-generator';
+// import { DataGenerator } from '@advanced-rest-client/arc-data-generator';
 import { PayloadProcessor } from '@advanced-rest-client/arc-electron-payload-processor';
 import { RequestEventTypes } from '@advanced-rest-client/arc-events';
 import '@anypoint-web-components/anypoint-switch/anypoint-switch.js';
@@ -26,7 +26,7 @@ class ComponentPage extends DemoPage {
     this.value = undefined;
     this.meta = undefined;
     this.editorType = undefined;
-    this.generator = new DataGenerator();
+    // this.generator = new DataGenerator();
     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
       this.darkThemeActive = true;
     }
@@ -53,7 +53,23 @@ class ComponentPage extends DemoPage {
         // ....
       }
     }
+    await this.monacoReady();
     this.initializing = false;
+  }
+
+  async monacoReady() {
+    if (this.editorType !== 'Monaco') {
+      return 0;
+    }
+    return new Promise((resolve) => {
+      this.monacoInterval = setInterval(() => {
+        // @ts-ignore
+        if (window.monaco) {
+          clearInterval(this.monacoInterval);
+          resolve();
+        }
+      }, 20);
+    });
   }
 
   async restoreValue() {
@@ -90,7 +106,7 @@ class ComponentPage extends DemoPage {
     if (valueRaw === 'CodeMirror') {
       await this.loadCodeMirror();
     } else {
-      this.loadMonaco();
+      await this.loadMonaco();
     }
   }
 
@@ -133,6 +149,8 @@ class ComponentPage extends DemoPage {
       if (isModule) {
         script.type = 'module';
       }
+      // script.defer = false;
+      script.async = false;
       script.onload = () => resolve();
       script.onerror = () => reject(new Error(`Unable to load ${url}`));
       const s = document.getElementsByTagName('script')[0];
@@ -140,7 +158,7 @@ class ComponentPage extends DemoPage {
     });
   }
 
-  loadMonaco() {
+  async loadMonaco() {
     // @ts-ignore
     window.MonacoEnvironment = {
       getWorker: (moduleId, label) => {
@@ -160,6 +178,20 @@ class ComponentPage extends DemoPage {
         });
       }
     }
+    await this.loadMonacoScripts();
+  }
+
+  async loadMonacoScripts() {
+    const prefix = `../node_modules/monaco-editor/min/vs/`;
+    // @ts-ignore
+    window.require = { paths: { vs: prefix } };
+    const scripts = [
+      `${prefix}loader.js`,
+      `${prefix}editor/editor.main.nls.js`,
+      `${prefix}editor/editor.main.js`,
+    ];
+    const ps = scripts.map((url) => this.loadScript(url));
+    await Promise.all(ps);
   }
 
   /**
@@ -309,7 +341,7 @@ class ComponentPage extends DemoPage {
       <anypoint-switch name="autoEncode" @change="${this._toggleMainOption}">Auto encode</anypoint-switch>
       <div>
         <label id="ctLabel">Request content type</label>
-        <select @change="${this.contentTypeChanged}" aria-labelledby="ctLabel">
+        <select @blur="${this.contentTypeChanged}" aria-labelledby="ctLabel">
           <option value="">auto</option>
           <option value="application/json">application/json</option>
           <option value="application/xml">application/xml</option>
@@ -319,7 +351,7 @@ class ComponentPage extends DemoPage {
       </div>
       <div>
         <label id="editorLabel">Raw editor</label>
-        <select @change="${this.editorTypeChanged}" aria-labelledby="editorLabel">
+        <select @blur="${this.editorTypeChanged}" aria-labelledby="editorLabel">
           <option ?selected="${editorType === 'Monaco'}" value="Monaco">Monaco</option>
           <option ?selected="${editorType === 'CodeMirror'}" value="CodeMirror">CodeMirror</option>
         </select>

@@ -1,5 +1,6 @@
 /* eslint-disable no-plusplus */
 import { assert } from '@open-wc/testing';
+import './monaco-loader.js';
 import { MultipartGenerator } from '../src/MultipartGenerator.js';
 
 describe('MultipartGenerator', () => {

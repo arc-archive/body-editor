@@ -65,6 +65,8 @@ Both Monaco and CodeMirror editors have external dependencies that has to be inc
 
 ### Monaco dependencies
 
+Include Monaco in the application before running the component. For now the component can't include it directly as Monaco performs an import on CSS files.
+
 Monaco uses web workers to work. These workers has to be in the final build of the application. Set a global `MonacoEnvironment` property to instruct the Monaco editor how to get the workers. Also, take a look into Monaco's documentation to learn more about build process and plugins for WebPack.
 
 ```javascript

@@ -1,5 +1,6 @@
 import { assert, fixture, nextFrame } from '@open-wc/testing';
 import sinon from 'sinon';
+import './monaco-loader.js';
 import '../body-multipart-editor.js'
 import {
   addText,

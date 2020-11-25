@@ -14,12 +14,16 @@ License for the specific language governing permissions and limitations under
 the License.
 */
 import { LitElement, html } from 'lit-element';
-import * as monaco from 'monaco-editor'; // /esm/vs/editor/editor.main.js
+// import * as monaco from 'monaco-editor'; // /esm/vs/editor/editor.main.js
 import { RequestEvents } from '@advanced-rest-client/arc-events';
 import elementStyles from './styles/BodyEditor.styles.js';
 import monacoStyles from './styles/Monaco.styles.js';
 
-/* @typedef {import('monaco-editor')} monaco */
+/** @typedef {import('monaco-editor').editor.IStandaloneCodeEditor} IStandaloneCodeEditor */
+/** @typedef {import('monaco-editor').editor.IStandaloneEditorConstructionOptions} IStandaloneEditorConstructionOptions */
+/** @typedef {import('monaco-editor').editor.IEditorOptions} IEditorOptions */
+
+/* global monaco */
 
 import {
   valueValue,
@@ -105,7 +109,7 @@ export class BodyRawEditorElement extends LitElement {
   }
 
   /**
-   * @returns {monaco.editor.IStandaloneCodeEditor}
+   * @returns {IStandaloneCodeEditor}
    */
   get editor() {
     return this[monacoInstance];
@@ -166,7 +170,7 @@ export class BodyRawEditorElement extends LitElement {
 
   /**
    * Sets up editor actions
-   * @param {monaco.editor.IStandaloneCodeEditor} editor
+   * @param {IStandaloneCodeEditor} editor
    */
   [setupActions](editor) {
     editor.addAction({
@@ -220,13 +224,13 @@ export class BodyRawEditorElement extends LitElement {
 
   /**
    * Generates Monaco configuration
-   * @returns {monaco.editor.IStandaloneEditorConstructionOptions}
+   * @returns {IStandaloneEditorConstructionOptions}
    */
   [generateEditorConfig]() {
     const { value='', readOnly } = this;
     const language = this[languageValue];
 
-    const config = /** monaco.editor.IStandaloneEditorConstructionOptions */ ({
+    const config = /** IStandaloneEditorConstructionOptions */ ({
       minimap: {
         enabled: false,
       },
@@ -250,7 +254,7 @@ export class BodyRawEditorElement extends LitElement {
   }
 
   /**
-   * @param {keyof monaco.editor.IEditorOptions} prop The property to set
+   * @param {keyof IEditorOptions} prop The property to set
    * @param {any} value
    */
   [setEditorConfigProperty](prop, value) {

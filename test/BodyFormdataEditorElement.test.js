@@ -1,6 +1,7 @@
 import { assert, aTimeout, fixture, html, nextFrame } from '@open-wc/testing';
 import sinon from 'sinon';
 import { DataGenerator } from '@advanced-rest-client/arc-data-generator';
+import './monaco-loader.js';
 import '../body-formdata-editor.js'
 import {
   addParamHandler,
