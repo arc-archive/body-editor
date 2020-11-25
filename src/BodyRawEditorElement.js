@@ -16,8 +16,8 @@ the License.
 import { LitElement, html } from 'lit-element';
 // import * as monaco from 'monaco-editor'; // /esm/vs/editor/editor.main.js
 import { RequestEvents } from '@advanced-rest-client/arc-events';
+import { MonacoTheme, MonacoHelper, MonacoStyles } from '@advanced-rest-client/monaco-support';
 import elementStyles from './styles/BodyEditor.styles.js';
-import monacoStyles from './styles/Monaco.styles.js';
 
 /** @typedef {import('monaco-editor').editor.IStandaloneCodeEditor} IStandaloneCodeEditor */
 /** @typedef {import('monaco-editor').editor.IStandaloneEditorConstructionOptions} IStandaloneEditorConstructionOptions */
@@ -29,14 +29,12 @@ import {
   valueValue,
   monacoInstance,
   contentTypeValue,
-  detectLanguage,
   languageValue,
   setLanguage,
   setupActions,
   valueChanged,
   changeTimeout,
   notifyChange,
-  generateMonacoTheme,
   generateEditorConfig,
   readOnlyValue,
   setEditorConfigProperty,
@@ -44,7 +42,7 @@ import {
 
 export class BodyRawEditorElement extends LitElement {
   static get styles() {
-    return [elementStyles, monacoStyles];
+    return [elementStyles, MonacoStyles];
   }
 
   static get properties() {
@@ -91,7 +89,7 @@ export class BodyRawEditorElement extends LitElement {
     }
     this[contentTypeValue] = value;
     const oldLang = this[languageValue];
-    const lang = this[detectLanguage](value);
+    const lang = MonacoHelper.detectLanguage(value);
     if (oldLang === lang) {
       return;
     }
@@ -133,31 +131,6 @@ export class BodyRawEditorElement extends LitElement {
     instance.onDidChangeModelContent(this[valueChanged]);
     this[monacoInstance] = instance;
     this[setupActions](instance);
-  }
-
-  /**
-   * Detects editor language based on the content type header value 
-   * @param {string} mime The current content type of the request
-   * @returns {string|undefined} THe language, if detected.
-   */
-  [detectLanguage](mime) {
-    if (!mime || typeof mime !== 'string') {
-      return undefined;
-    }
-    let ct = mime;
-    const semicolon = ct.indexOf(';');
-    if (semicolon !== -1) {
-      ct = ct.substr(0, semicolon);
-    }
-    switch (ct) {
-      case 'application/json':
-      case 'application/x-json': return 'json';
-      case 'application/svg+xml':
-      case 'application/xml': return 'xml';
-      case 'text/html': return 'html';
-      case 'text/css': return 'css';
-      default: return undefined;
-    }
   }
 
   /**
@@ -209,23 +182,6 @@ export class BodyRawEditorElement extends LitElement {
     this.dispatchEvent(new CustomEvent('change'));
   }
 
-  [generateMonacoTheme]() {
-    let bgColor = getComputedStyle(document.body).getPropertyValue('--code-editor-color').trim();
-    if (!bgColor) {
-      bgColor = '#F5F5F5';
-    }
-    const theme = {
-      base: 'vs', 
-      inherit: true,
-      rules: [{ background: bgColor }],
-      colors: {
-        "editor.background": bgColor,
-      },
-    };
-    // @ts-ignore
-    monaco.editor.defineTheme('ArcTheme', theme);
-  }
-
   /**
    * Generates Monaco configuration
    * @returns {IStandaloneEditorConstructionOptions}
@@ -234,7 +190,7 @@ export class BodyRawEditorElement extends LitElement {
     const { value='', readOnly } = this;
     const language = this[languageValue];
 
-    const config = /** IStandaloneEditorConstructionOptions */ ({
+    let config = /** IStandaloneEditorConstructionOptions */ ({
       minimap: {
         enabled: false,
       },
@@ -245,12 +201,7 @@ export class BodyRawEditorElement extends LitElement {
       detectIndentation: true,
       value,
     });
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      config.theme = "vs-dark";
-    } else {
-      this[generateMonacoTheme]();
-      config.theme = 'ArcTheme';
-    }
+    config = MonacoTheme.assignTheme(monaco, config);
     if (language) {
       config.language = language;
     }

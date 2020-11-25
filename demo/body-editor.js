@@ -5,6 +5,7 @@ import { DemoPage } from '@advanced-rest-client/arc-demo-helper';
 import { PayloadProcessor } from '@advanced-rest-client/arc-electron-payload-processor';
 import { RequestEventTypes } from '@advanced-rest-client/arc-events';
 import '@anypoint-web-components/anypoint-switch/anypoint-switch.js';
+import { MonacoLoader } from '@advanced-rest-client/monaco-support';
 import '../body-editor.js';
 
 /** @typedef {import('../').BodyEditorElement} BodyEditorElement */
@@ -53,23 +54,7 @@ class ComponentPage extends DemoPage {
         // ....
       }
     }
-    await this.monacoReady();
     this.initializing = false;
-  }
-
-  async monacoReady() {
-    if (this.editorType !== 'Monaco') {
-      return 0;
-    }
-    return new Promise((resolve) => {
-      this.monacoInterval = setInterval(() => {
-        // @ts-ignore
-        if (window.monaco) {
-          clearInterval(this.monacoInterval);
-          resolve();
-        }
-      }, 20);
-    });
   }
 
   async restoreValue() {
@@ -99,7 +84,7 @@ class ComponentPage extends DemoPage {
     const allowed = ['CodeMirror', 'Monaco'];
     const valueRaw = window.localStorage.getItem(editorKey);
     if (!allowed.includes(valueRaw)) {
-      this.loadMonaco();
+      await this.loadMonaco();
       return;
     }
     this.editorType = valueRaw;
@@ -159,39 +144,10 @@ class ComponentPage extends DemoPage {
   }
 
   async loadMonaco() {
-    // @ts-ignore
-    window.MonacoEnvironment = {
-      getWorker: (moduleId, label) => {
-        let url;
-        const prefix = '../node_modules/monaco-editor/esm/vs/';
-        const langPrefix = `${prefix}language/`;
-        switch (label) {
-          case 'json': url = `${langPrefix}json/json.worker.js`; break;
-          case 'css': url = `${langPrefix}css/css.worker.js`; break;
-          case 'html': url = `${langPrefix}html/html.worker.js`; break;
-          case 'javascript':
-          case 'typescript': url = `${langPrefix}typescript/ts.worker.js`; break;
-          default: url = `${prefix}editor/editor.worker.js`; break;
-        }
-        return new Worker(url, {
-          type: 'module'
-        });
-      }
-    }
-    await this.loadMonacoScripts();
-  }
-
-  async loadMonacoScripts() {
-    const prefix = `../node_modules/monaco-editor/min/vs/`;
-    // @ts-ignore
-    window.require = { paths: { vs: prefix } };
-    const scripts = [
-      `${prefix}loader.js`,
-      `${prefix}editor/editor.main.nls.js`,
-      `${prefix}editor/editor.main.js`,
-    ];
-    const ps = scripts.map((url) => this.loadScript(url));
-    await Promise.all(ps);
+    const base = `../node_modules/monaco-editor/`;
+    MonacoLoader.createEnvironment(base);
+    await MonacoLoader.loadMonaco(base);
+    await MonacoLoader.monacoReady();
   }
 
   /**

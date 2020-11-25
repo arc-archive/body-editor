@@ -5,14 +5,12 @@ import {
   valueValue,
   monacoInstance,
   contentTypeValue,
-  detectLanguage,
   languageValue,
   setLanguage,
   setupActions,
   valueChanged,
   changeTimeout,
   notifyChange,
-  generateMonacoTheme,
   generateEditorConfig,
   setEditorConfigProperty,
 } from './internals.js';
@@ -48,13 +46,6 @@ export class BodyRawEditorElement extends LitElement {
   firstUpdated(): void;
 
   /**
-   * Detects editor language based on the content type header value 
-   * @param mime The current content type of the request
-   * @returns THe language, if detected.
-   */
-  [detectLanguage](mime: string): string;
-
-  /**
    * @param lang New language to set
    */
   [setLanguage](lang: string): string;
@@ -67,8 +58,6 @@ export class BodyRawEditorElement extends LitElement {
   [valueChanged](): void;
 
   [notifyChange](): void;
-
-  [generateMonacoTheme](): void;
 
   /**
    * Generates Monaco configuration
