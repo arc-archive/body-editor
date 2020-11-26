@@ -57,3 +57,22 @@
 * moving portion of the logic to an external module [4c5f116](https://github.com/advanced-rest-client/body-editor/commit/4c5f1162258aad9530d544bb1b4e1a2a6b4b5007) by Pawel Psztyc
 
 
+<a name="0.1.4"></a>
+## [0.1.4](https://github.com/advanced-rest-client/body-editor/compare/0.1.2...0.1.4) (2020-11-26)
+
+### Update
+
+* [ci skip] automated merge master->stage. syncing main branches [357f527](https://github.com/advanced-rest-client/body-editor/commit/357f5272eefbd2002fbe40467f95822451cc922d) by Ci agent
+* [ci skip] automated merge master->stage. syncing main branches [df7d549](https://github.com/advanced-rest-client/body-editor/commit/df7d54901932f1e8bdc524c1ba14812451abd163) by Ci agent
+
+
+### Features
+
+* adding ArcResizableMixin [d49e0e7](https://github.com/advanced-rest-client/body-editor/commit/d49e0e73fa0cda44baa5c50739a24b24a2348d00) by Pawel Psztyc
+
+
+### Refactor
+
+* moving portion of the logic to an external module [4c5f116](https://github.com/advanced-rest-client/body-editor/commit/4c5f1162258aad9530d544bb1b4e1a2a6b4b5007) by Pawel Psztyc
+
+
