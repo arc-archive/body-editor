@@ -27,6 +27,7 @@ import '@advanced-rest-client/code-mirror/code-mirror.js';
 import linterStyles from '@advanced-rest-client/code-mirror-linter/lint-style.js';
 import { PayloadProcessor } from '@advanced-rest-client/arc-electron-payload-processor';
 import { RequestEvents } from '@advanced-rest-client/arc-events';
+import { ArcResizableMixin } from '@advanced-rest-client/arc-resizable-mixin';
 import { MultipartGenerator } from './MultipartGenerator.js';
 import elementStyles from './styles/BodyEditor.styles.js';
 import {
@@ -128,7 +129,7 @@ export const editorTypes = [
 /**
  * @fires change When the value and the model change
  */
-export class BodyEditorElement extends LitElement {
+export class BodyEditorElement extends ArcResizableMixin(LitElement) {
   static get styles() {
     return [elementStyles, linterStyles];
   }
@@ -356,6 +357,7 @@ export class BodyEditorElement extends LitElement {
       this.value = value;
     }
     await this.requestUpdate();
+    this.notifyResize();
     if (id === 'file') {
       this[restoreFileModel]();
       this[notifyInput]();

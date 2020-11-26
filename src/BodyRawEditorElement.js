@@ -16,6 +16,7 @@ the License.
 import { LitElement, html } from 'lit-element';
 // import * as monaco from 'monaco-editor'; // /esm/vs/editor/editor.main.js
 import { RequestEvents } from '@advanced-rest-client/arc-events';
+import { ArcResizableMixin } from '@advanced-rest-client/arc-resizable-mixin';
 import { MonacoTheme, MonacoHelper, MonacoStyles } from '@advanced-rest-client/monaco-support';
 import elementStyles from './styles/BodyEditor.styles.js';
 
@@ -38,9 +39,10 @@ import {
   generateEditorConfig,
   readOnlyValue,
   setEditorConfigProperty,
+  resizeHandler,
 } from './internals.js';
 
-export class BodyRawEditorElement extends LitElement {
+export class BodyRawEditorElement extends ArcResizableMixin(LitElement) {
   static get styles() {
     return [elementStyles, MonacoStyles];
   }
@@ -123,6 +125,17 @@ export class BodyRawEditorElement extends LitElement {
     this[readOnlyValue] = false;
 
     this[valueChanged] = this[valueChanged].bind(this);
+    this[resizeHandler] = this[resizeHandler].bind(this);
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.addEventListener('resize', this[resizeHandler]);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.removeEventListener('resize', this[resizeHandler]);
   }
 
   firstUpdated() {
@@ -131,6 +144,16 @@ export class BodyRawEditorElement extends LitElement {
     instance.onDidChangeModelContent(this[valueChanged]);
     this[monacoInstance] = instance;
     this[setupActions](instance);
+  }
+
+  /**
+   * Handler for the `resize` event provided by the resizable mixin.
+   */
+  [resizeHandler]() {
+    if (!this[monacoInstance]) {
+      return;
+    }
+    this[monacoInstance].layout();
   }
 
   /**

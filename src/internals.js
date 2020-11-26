@@ -83,3 +83,4 @@ export const readOnlyValue = Symbol('readOnlyValue');
 export const setEditorConfigProperty = Symbol('setEditorConfigProperty');
 export const dropHandler = Symbol('dropHandler');
 export const dragOverHandler = Symbol('dragOverHandler');
+export const resizeHandler = Symbol('resizeHandler');
