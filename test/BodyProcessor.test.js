@@ -3,6 +3,7 @@ import { BodyProcessor } from '../index.js';
 
 /** @typedef {import('@advanced-rest-client/arc-types').ArcRequest.ARCSavedRequest} ARCSavedRequest */
 /** @typedef {import('@advanced-rest-client/arc-types').ArcResponse.Response} ArcResponse */
+/** @typedef {import('@advanced-rest-client/arc-types').ArcResponse.TransformedPayload} TransformedPayload */
 
 describe('BodyProcessor', () => {
   const initRequest = /** @type ARCSavedRequest */ ({
@@ -289,6 +290,19 @@ describe('BodyProcessor', () => {
       const result = await BodyProcessor.stringifyRequest(obj);
       assert.equal(result.response.blob, 'data:text/plain;base64,KioqKiogKioq');
     });
+
+    it('processes the response payload with ArrayBuffer', async () => {
+      const encoder = new TextEncoder();
+      const view = encoder.encode('test');
+      const obj = {
+        ...initRequest,
+      };
+      obj.response.payload = view.buffer;
+      const result = await BodyProcessor.stringifyRequest(obj);
+      const body = /** @type TransformedPayload */ (result.response.payload);
+      assert.equal(body.type, 'ArrayBuffer');
+      assert.typeOf(body.data, 'array');
+    });
   });
 
   describe('restoreRequest()', () => {
@@ -308,6 +322,70 @@ describe('BodyProcessor', () => {
       obj.response.blob = 'data:text/plain;base64,KioqKiogKioq';
       const result = BodyProcessor.restoreRequest(obj);
       assert.typeOf(result.response.payload, 'blob');
+    });
+
+    it('restores the response payload with ArrayBuffer', async () => {
+      const encoder = new TextEncoder();
+      const view = encoder.encode('test-ab');
+      const obj = {
+        ...initRequest,
+      };
+      obj.response.payload = BodyProcessor.arrayBufferToTransformed(view.buffer);
+      const result = BodyProcessor.restoreRequest(obj);
+      assert.typeOf(result.response.payload, 'ArrayBuffer');
+    });
+  });
+
+  describe('bufferToTransformed()', () => {
+    it('returns transformed Buffer (NodeJS)', () => {
+      const buff = [1,2,3];
+      // @ts-ignore
+      buff.copy = () => {};
+      const result = BodyProcessor.bufferToTransformed(buff);
+      assert.equal(result.type, 'Buffer');
+      assert.deepEqual(result.data, [1,2,3]);
+    });
+
+    it('returns undefined for other types', () => {
+      const encoder = new TextEncoder();
+      const view = encoder.encode('test-ab');
+      const result = BodyProcessor.bufferToTransformed(view.buffer);
+      assert.isUndefined(result);
+    });
+  });
+
+  describe('arrayBufferToTransformed()', () => {
+    it('returns undefined for other types', () => {
+      const buff = [1,2,3];
+      // @ts-ignore
+      buff.copy = () => {};
+      const result = BodyProcessor.arrayBufferToTransformed(buff);
+      assert.isUndefined(result);
+    });
+
+    it('returns transformed ArrayBuffer', () => {
+      const encoder = new TextEncoder();
+      const view = encoder.encode('test');
+      const result = BodyProcessor.arrayBufferToTransformed(view.buffer);
+      assert.equal(result.type, 'ArrayBuffer');
+      assert.deepEqual(result.data, [116, 101, 115, 116]);
+    });
+  });
+
+  describe('transformedToPayload()', () => {
+    it('restores ArrayBuffer', () => {
+      const info = {
+        type: 'ArrayBuffer',
+        data: [116, 101, 115, 116]
+      };
+      const result = BodyProcessor.transformedToPayload(info);
+      assert.typeOf(result, 'ArrayBuffer');
+    });
+
+    it('returns undefined when unknown type', () => {
+      const info = {};
+      const result = BodyProcessor.transformedToPayload(info);
+      assert.isUndefined(result);
     });
   });
 });

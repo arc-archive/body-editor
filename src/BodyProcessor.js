@@ -1,7 +1,9 @@
+/* eslint-disable class-methods-use-this */
 /** @typedef {import('@advanced-rest-client/arc-types').ArcRequest.ARCHistoryRequest} ARCHistoryRequest */
 /** @typedef {import('@advanced-rest-client/arc-types').ArcRequest.ARCSavedRequest} ARCSavedRequest */
 /** @typedef {import('@advanced-rest-client/arc-types').ArcResponse.Response} ArcResponse */
 /** @typedef {import('@advanced-rest-client/arc-types').RequestBody.MultipartBody} MultipartBody */
+/** @typedef {import('@advanced-rest-client/arc-types').ArcResponse.TransformedPayload} TransformedPayload */
 
 /**
  * A helper class that processes payload before saving it to a  datastore or a file.
@@ -70,7 +72,49 @@ export class BodyProcessor {
       data.blob = result;
       return data;
     }
+    const transformed = BodyProcessor.bufferToTransformed(request.payload) || BodyProcessor.arrayBufferToTransformed(request.payload);
+    if (transformed) {
+      const data = { ...request };
+      data.payload = transformed;
+      return data;
+    }
     return request;
+  }
+
+  /**
+   * When the passed argument is a NodeJS buffer it creates an object describing the buffer
+   * in a safe to store object.
+   * 
+   * @param {any} payload 
+   * @returns {TransformedPayload|undefined} The buffer metadata or undefined if the passed argument is not a Buffer.
+   */
+  static bufferToTransformed(payload) {
+    const typedBuffer = /** @type Buffer */(payload);
+    if (typeof typedBuffer.copy === 'function') {
+      return {
+        type: 'Buffer',
+        data: [...typedBuffer],
+      };
+    }
+    return undefined;
+  }
+
+  /**
+   * When the passed argument is an ArrayBuffer it creates an object describing the object in a safe to store object.
+   * 
+   * @param {any} payload 
+   * @returns {TransformedPayload|undefined} The buffer metadata or undefined if the passed argument is not an ArrayBuffer.
+   */
+  static arrayBufferToTransformed(payload) {
+    const typedArrayBuffer = /** @type ArrayBuffer */(payload);
+    if (typedArrayBuffer.byteLength) {
+      const view = new Uint8Array(typedArrayBuffer);
+      return {
+        type: 'ArrayBuffer',
+        data: Array.from(view),
+      };
+    }
+    return undefined;
   }
 
   /**
@@ -160,7 +204,9 @@ export class BodyProcessor {
         console.warn('Unable to restore payload.', e);
       }
       delete request.multipart;
-    } else if (request.blob) {
+      return request;
+    } 
+    if (request.blob) {
       try {
         request.payload = BodyProcessor.dataURLtoBlob(request.blob);
       } catch (e) {
@@ -168,8 +214,35 @@ export class BodyProcessor {
         console.warn('Unable to restore payload.', e);
       }
       delete request.blob;
+      return request;
+    }
+    if (!request.payload || typeof request.payload === 'string') {
+      return request;
+    }
+    const restored = BodyProcessor.transformedToPayload(request.payload);
+    if (restored) {
+      request.payload = restored;
+      return request;
     }
     return request;
+  }
+
+  /**
+   * Handles potential `TransformedPayload` and returns the original data
+   * 
+   * @param {any} payload 
+   * @returns {Buffer|ArrayBuffer|undefined} The original data format or undefined otherwise.
+   */
+  static transformedToPayload(payload) {
+    const body = /** @type TransformedPayload */ (payload);
+    if (body.type === 'ArrayBuffer') {
+      const { buffer } = new Uint16Array(body.data);
+      return buffer;
+    }
+    if (body.type === 'Buffer') {
+      return Buffer.from(body.data);
+    }
+    return undefined;
   }
 
   /**

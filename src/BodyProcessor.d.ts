@@ -1,4 +1,5 @@
 import { ArcRequest, RequestBody } from '@advanced-rest-client/arc-types';
+import { TransformedPayload } from '@advanced-rest-client/arc-types/src/request/ArcResponse';
 
 /**
  * A helper class that processes payload before saving it to a
@@ -35,6 +36,23 @@ export declare class BodyProcessor {
   static payloadToString(request: ArcRequest.ARCHistoryRequest|ArcRequest.ARCSavedRequest): Promise<ArcRequest.ARCHistoryRequest|ArcRequest.ARCSavedRequest>;
 
   /**
+   * When the passed argument is a NodeJS buffer it creates an object describing the buffer
+   * in a safe to store object.
+   * 
+   * @param payload 
+   * @returns The buffer metadata or undefined if the passed argument is not a Buffer.
+   */
+  static bufferToTransformed(payload: any): TransformedPayload|undefined;
+
+  /**
+   * When the passed argument is an ArrayBuffer it creates an object describing the object in a safe to store object.
+   * 
+   * @param payload 
+   * @returns The buffer metadata or undefined if the passed argument is not an ArrayBuffer.
+   */
+  static arrayBufferToTransformed(payload: any): TransformedPayload|undefined;
+
+  /**
    * Computes `multipart` list value to replace FormData with array that can
    * be stored in the datastore.
    *
@@ -67,6 +85,14 @@ export declare class BodyProcessor {
    * @returns Processed request
    */
   static restorePayload(request: ArcRequest.ARCHistoryRequest|ArcRequest.ARCSavedRequest): ArcRequest.ARCHistoryRequest|ArcRequest.ARCSavedRequest;
+
+  /**
+   * Handles potential `TransformedPayload` and returns the original data
+   * 
+   * @param payload 
+   * @returns The original data format or undefined otherwise.
+   */
+  static transformedToPayload(payload: any): Buffer|ArrayBuffer|undefined;
 
   /**
    * Restores FormData from ARC data model.
