@@ -101,3 +101,28 @@
 * fixcing types [5886e20](https://github.com/advanced-rest-client/body-editor/commit/5886e208e279466f21b3db92f8b7fdbde3ff027a) by Pawel Psztyc
 
 
+<a name="0.1.7"></a>
+## [0.1.7](https://github.com/advanced-rest-client/body-editor/compare/0.1.4...0.1.7) (2020-12-04)
+
+### Build
+
+* bumping version [6e52edd](https://github.com/advanced-rest-client/body-editor/commit/6e52edd33203b0ce357bb010f247953fa72de7bc) by Pawel Psztyc
+
+
+### Update
+
+* [ci skip] automated merge master->stage. syncing main branches [1fdbd43](https://github.com/advanced-rest-client/body-editor/commit/1fdbd437476bf1a8d848b96d9d20316789d5bcf8) by Ci agent
+* [ci skip] automated merge master->stage. syncing main branches [bbf4340](https://github.com/advanced-rest-client/body-editor/commit/bbf43409e886b828ce153972e9251cbe5d55e664) by Ci agent
+
+
+### Features
+
+* adding Buffer and ArrayBuffer support [2743ac5](https://github.com/advanced-rest-client/body-editor/commit/2743ac522563271be1eca918f462d3235fe77251) by Pawel Psztyc
+* moving PayloadProcessor here [5cfa4c5](https://github.com/advanced-rest-client/body-editor/commit/5cfa4c5807f29de88da6e3757fc0e3c3d2c765e8) by Pawel Psztyc
+
+
+### Bug Fixes
+
+* fixcing types [5886e20](https://github.com/advanced-rest-client/body-editor/commit/5886e208e279466f21b3db92f8b7fdbde3ff027a) by Pawel Psztyc
+
+
