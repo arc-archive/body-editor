@@ -236,7 +236,7 @@ export class BodyProcessor {
   static transformedToPayload(payload) {
     const body = /** @type TransformedPayload */ (payload);
     if (body.type === 'ArrayBuffer') {
-      const { buffer } = new Uint16Array(body.data);
+      const { buffer } = new Uint8Array(body.data);
       return buffer;
     }
     if (body.type === 'Buffer') {
