@@ -126,3 +126,22 @@
 * fixcing types [5886e20](https://github.com/advanced-rest-client/body-editor/commit/5886e208e279466f21b3db92f8b7fdbde3ff027a) by Pawel Psztyc
 
 
+<a name="0.1.8"></a>
+## [0.1.8](https://github.com/advanced-rest-client/body-editor/compare/0.1.6...0.1.8) (2020-12-04)
+
+### Update
+
+* [ci skip] automated merge master->stage. syncing main branches [fd743b4](https://github.com/advanced-rest-client/body-editor/commit/fd743b4c4962a691658de742c67941184ca24e11) by Ci agent
+* [ci skip] automated merge master->stage. syncing main branches [1fdbd43](https://github.com/advanced-rest-client/body-editor/commit/1fdbd437476bf1a8d848b96d9d20316789d5bcf8) by Ci agent
+
+
+### Features
+
+* adding Buffer and ArrayBuffer support [2743ac5](https://github.com/advanced-rest-client/body-editor/commit/2743ac522563271be1eca918f462d3235fe77251) by Pawel Psztyc
+
+
+### Bug Fixes
+
+* fixing ArrayBuffer type [f03bf52](https://github.com/advanced-rest-client/body-editor/commit/f03bf52195f6a40c1e183005aed5382018918027) by Pawel Psztyc
+
+
