@@ -16,7 +16,7 @@ import { LitElement, html } from 'lit-element';
 import '@anypoint-web-components/anypoint-input/anypoint-input.js';
 import '@anypoint-web-components/anypoint-switch/anypoint-switch.js';
 import '@anypoint-web-components/anypoint-button/anypoint-button.js';
-import { PayloadProcessor } from '@advanced-rest-client/arc-electron-payload-processor';
+import { BodyProcessor } from './BodyProcessor.js';
 import elementStyles from './styles/Multipart.styles.js';
 import {
   valueValue,
@@ -206,7 +206,7 @@ export class BodyMultipartEditorElement extends LitElement {
     if (this.readOnly || this.disabled) {
       return;
     }
-    const value = await PayloadProcessor.blobToString(file);
+    const value = await BodyProcessor.blobToString(file);
     if (!this.model) {
       this[modelValue] = /** @type MultipartBody[] */ ([]);
     }
@@ -260,7 +260,7 @@ export class BodyMultipartEditorElement extends LitElement {
     if (!Array.isArray(model)) {
       return new FormData();
     }
-    return PayloadProcessor.restoreMultipart(model);
+    return BodyProcessor.restoreMultipart(model);
   }
 
   /**
@@ -274,7 +274,7 @@ export class BodyMultipartEditorElement extends LitElement {
       this[modelValue] = /** @type MultipartBody[] */ ([]);
       return;
     }
-    const model = await PayloadProcessor.createMultipartEntry(value);
+    const model = await BodyProcessor.createMultipartEntry(value);
     this[modelValue] = model;
     this[internalModel] = await this[internalFromModel](model);
     this.requestUpdate();
@@ -289,7 +289,7 @@ export class BodyMultipartEditorElement extends LitElement {
     const ps = model.map(async (item) => {
       const cp = { ...item };
       if (cp.isFile) {
-        const blob = PayloadProcessor.dataURLtoBlob(cp.value);
+        const blob = BodyProcessor.dataURLtoBlob(cp.value);
         // @ts-ignore
         blob.name = item.fileName;
         // @ts-ignore
@@ -301,7 +301,7 @@ export class BodyMultipartEditorElement extends LitElement {
       }
       // this transforms stored data URL back to the blob
       // and then back to the original string value.
-      const blob = PayloadProcessor.dataURLtoBlob(cp.value);
+      const blob = BodyProcessor.dataURLtoBlob(cp.value);
       const str = await blobToString(blob);
       cp.value = str;
       return cp;
@@ -457,7 +457,7 @@ export class BodyMultipartEditorElement extends LitElement {
     const index = Number(input.dataset.index);
     const item = this.model[index];
     const { value: form } = this;
-    const value = await PayloadProcessor.blobToString(file);
+    const value = await BodyProcessor.blobToString(file);
     item.value = value;
     // @ts-ignore
     this[internalModel][index].value = file;
@@ -526,7 +526,7 @@ export class BodyMultipartEditorElement extends LitElement {
     this[setFormValue](item, item.value);
     if (item.type) {
       // transform only blob values
-      item.value = await PayloadProcessor.blobToString(/** @type Blob */ (form.get(item.name)));
+      item.value = await BodyProcessor.blobToString(/** @type Blob */ (form.get(item.name)));
     }
     this[notifyChange]();
     this.requestUpdate();

@@ -2,10 +2,10 @@ import { html } from 'lit-html';
 import { ifDefined } from 'lit-html/directives/if-defined.js';
 import { DemoPage } from '@advanced-rest-client/arc-demo-helper';
 // import { DataGenerator } from '@advanced-rest-client/arc-data-generator';
-import { PayloadProcessor } from '@advanced-rest-client/arc-electron-payload-processor';
 import { RequestEventTypes } from '@advanced-rest-client/arc-events';
 import '@anypoint-web-components/anypoint-switch/anypoint-switch.js';
 import { MonacoLoader } from '@advanced-rest-client/monaco-support';
+import { BodyProcessor } from '../index.js';
 import '../body-editor.js';
 
 /** @typedef {import('../').BodyEditorElement} BodyEditorElement */
@@ -70,11 +70,11 @@ class ComponentPage extends DemoPage {
       return;
     }
     if (data.type === 'File') {
-      this.value = PayloadProcessor.dataURLtoBlob(data.value);
+      this.value = BodyProcessor.dataURLtoBlob(data.value);
       return;
     }
     if (data.type === 'FormData') {
-      this.value = PayloadProcessor.restoreMultipart(data.value);
+      this.value = BodyProcessor.restoreMultipart(data.value);
       return;
     }
     this.value = valueRaw;
@@ -194,7 +194,7 @@ class ComponentPage extends DemoPage {
       return;
     }
     if (value instanceof FormData) {
-      const entries = await PayloadProcessor.createMultipartEntry(value);
+      const entries = await BodyProcessor.createMultipartEntry(value);
       const data = {
         type: 'FormData',
         value: entries,
@@ -202,7 +202,7 @@ class ComponentPage extends DemoPage {
       window.localStorage.setItem(valueKey, JSON.stringify(data));
       return;
     }
-    const fileData = await PayloadProcessor.blobToString(value);
+    const fileData = await BodyProcessor.blobToString(value);
     const data = {
       type: 'File',
       value: fileData,
@@ -260,7 +260,7 @@ class ComponentPage extends DemoPage {
   }
 
   /**
-   * @param {string|File|FormData} value
+   * @param {string|Blob|FormData} value
    */
   printValue(value) {
     const parts = [];

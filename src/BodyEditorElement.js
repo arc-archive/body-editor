@@ -25,9 +25,9 @@ import '@anypoint-web-components/anypoint-dialog/anypoint-dialog-scrollable.js';
 import '@advanced-rest-client/code-mirror/code-mirror.js';
 // import '@advanced-rest-client/code-mirror-linter/code-mirror-linter.js';
 import linterStyles from '@advanced-rest-client/code-mirror-linter/lint-style.js';
-import { PayloadProcessor } from '@advanced-rest-client/arc-electron-payload-processor';
 import { RequestEvents } from '@advanced-rest-client/arc-events';
 import { ArcResizableMixin } from '@advanced-rest-client/arc-resizable-mixin';
+import { BodyProcessor } from './BodyProcessor.js';
 import { MultipartGenerator } from './MultipartGenerator.js';
 import elementStyles from './styles/BodyEditor.styles.js';
 import {
@@ -324,7 +324,7 @@ export class BodyEditorElement extends ArcResizableMixin(LitElement) {
     }
     const [item] = fileModel;
     const { name, value } = item;
-    const blob = PayloadProcessor.dataURLtoBlob(value);
+    const blob = BodyProcessor.dataURLtoBlob(value);
     // @ts-ignore
     blob.name = name;
     this[valueValue] = blob;
@@ -395,7 +395,7 @@ export class BodyEditorElement extends ArcResizableMixin(LitElement) {
       return;
     }
     this[valueValue] = file;
-    const fileData = await PayloadProcessor.blobToString(file);
+    const fileData = await BodyProcessor.blobToString(file);
     const model = [{ name: file.name, value: fileData }];
     this[setMetaModel]('file', model);
     this[notifyInput]();
@@ -641,7 +641,7 @@ export class BodyEditorElement extends ArcResizableMixin(LitElement) {
       const ps = Array.from(files).map((item) => editor.addFile(item));
       await Promise.all(ps);
     } else {
-      this.value = await PayloadProcessor.fileToString(file);
+      this.value = await BodyProcessor.fileToString(file);
       const { type } = file;
       if (type) {
         RequestEvents.State.contentTypeChange(this, type);
