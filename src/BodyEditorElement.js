@@ -299,6 +299,12 @@ export class BodyEditorElement extends ArcResizableMixin(LitElement) {
     this.addEventListener('dragover', this[dragOverHandler]);
   }
 
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.removeEventListener('drop', this[dropHandler]);
+    this.removeEventListener('dragover', this[dragOverHandler]);
+  }
+
   /**
    * This must be called only when the `model` property change from the 
    * outside. It restores values depending on the selected editor.

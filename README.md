@@ -11,7 +11,7 @@ The package contains:
 
 [![Published on NPM](https://img.shields.io/npm/v/@advanced-rest-client/body-editor.svg)](https://www.npmjs.com/package/@advanced-rest-client/body-editor)
 
-[![Build Status](https://travis-ci.com/advanced-rest-client/body-editor.svg)](https://travis-ci.com/advanced-rest-client/body-editor)
+![Tests](https://github.com/advanced-rest-client/body-editor/workflows/tests/badge.svg)
 
 ## Usage
 

@@ -40,6 +40,8 @@ import {
   readOnlyValue,
   setEditorConfigProperty,
   resizeHandler,
+  refreshEditor,
+  refreshDebouncer,
 } from './internals.js';
 
 export class BodyRawEditorElement extends ArcResizableMixin(LitElement) {
@@ -150,6 +152,19 @@ export class BodyRawEditorElement extends ArcResizableMixin(LitElement) {
    * Handler for the `resize` event provided by the resizable mixin.
    */
   [resizeHandler]() {
+    if (this[refreshDebouncer]) {
+      clearTimeout(this[refreshDebouncer]);
+    }
+    this[refreshDebouncer] = setTimeout(this[refreshEditor].bind(this));
+  }
+  
+  /**
+   * A function that is called from the `[resizeHandler]` in a timeout to reduce the number
+   * of computations during the application initialization, where it can receive hundreds of
+   * the `resize` events.
+   */
+  [refreshEditor]() {
+    this[refreshDebouncer] = undefined;
     if (!this[monacoInstance]) {
       return;
     }

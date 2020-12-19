@@ -84,3 +84,5 @@ export const setEditorConfigProperty = Symbol('setEditorConfigProperty');
 export const dropHandler = Symbol('dropHandler');
 export const dragOverHandler = Symbol('dragOverHandler');
 export const resizeHandler = Symbol('resizeHandler');
+export const refreshDebouncer = Symbol('refreshDebouncer');
+export const refreshEditor = Symbol('refreshEditor');

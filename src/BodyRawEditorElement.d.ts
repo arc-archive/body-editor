@@ -1,4 +1,5 @@
 import { LitElement, CSSResult, TemplateResult } from 'lit-element';
+import { ArcResizableMixin } from '@advanced-rest-client/arc-resizable-mixin';
 import * as monaco from 'monaco-editor';
 
 import {
@@ -15,7 +16,7 @@ import {
   setEditorConfigProperty,
 } from './internals.js';
 
-export class BodyRawEditorElement extends LitElement {
+export class BodyRawEditorElement extends ArcResizableMixin(LitElement) {
   static readonly styles: CSSResult[];
 
   /**

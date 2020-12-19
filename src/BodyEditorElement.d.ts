@@ -1,5 +1,6 @@
 import { LitElement, TemplateResult, CSSResult } from 'lit-element';
 import { RequestBody, ApiTypes } from '@advanced-rest-client/arc-types';
+import { ArcResizableMixin } from '@advanced-rest-client/arc-resizable-mixin';
 import {
   bodyTypeSelectorTemplate,
   bodyTypeOptionsTemplate,
@@ -61,7 +62,7 @@ export declare type allowedEditors = 'raw' | 'urlEncode' | 'multipart' | 'file';
 /**
  * @fires change When the value and the model change
  */
-export declare class BodyEditorElement extends LitElement {
+export declare class BodyEditorElement extends ArcResizableMixin(LitElement) {
   static readonly styles: CSSResult[];
 
   /**
