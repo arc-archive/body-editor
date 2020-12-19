@@ -145,3 +145,23 @@
 * fixing ArrayBuffer type [f03bf52](https://github.com/advanced-rest-client/body-editor/commit/f03bf52195f6a40c1e183005aed5382018918027) by Pawel Psztyc
 
 
+<a name="0.1.9"></a>
+## [0.1.9](https://github.com/advanced-rest-client/body-editor/compare/0.1.7...0.1.9) (2020-12-19)
+
+### Build
+
+* bumping version [0fde459](https://github.com/advanced-rest-client/body-editor/commit/0fde4594123e7279206d77b389490e053da7a8b2) by Pawel Psztyc
+
+
+### Update
+
+* adding layout in a debouncer [611e468](https://github.com/advanced-rest-client/body-editor/commit/611e4682af990e45e8227c9912b0208447bff0ca) by Pawel Psztyc
+* [ci skip] automated merge master->stage. syncing main branches [5024c15](https://github.com/advanced-rest-client/body-editor/commit/5024c1522c92dfd9773a81daa577836944d82ead) by Ci agent
+* [ci skip] automated merge master->stage. syncing main branches [fd743b4](https://github.com/advanced-rest-client/body-editor/commit/fd743b4c4962a691658de742c67941184ca24e11) by Ci agent
+
+
+### Bug Fixes
+
+* fixing ArrayBuffer type [f03bf52](https://github.com/advanced-rest-client/body-editor/commit/f03bf52195f6a40c1e183005aed5382018918027) by Pawel Psztyc
+
+
