@@ -1,7 +1,7 @@
 {
   "name": "@advanced-rest-client/body-editor",
   "description": "HTTP body editor for a HTTP request made as a web component",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "license": "Apache-2.0",
   "main": "index.js",
   "module": "index.js",
