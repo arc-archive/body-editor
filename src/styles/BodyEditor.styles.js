@@ -13,6 +13,14 @@ export default css`
   height: 100%;
   flex: 1;
   position: relative;
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+body-raw-editor {
+  height: 100%;
 }
 
 .empty-editor {

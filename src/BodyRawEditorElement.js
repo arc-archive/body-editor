@@ -238,6 +238,7 @@ export class BodyRawEditorElement extends ArcResizableMixin(LitElement) {
       tabSize: 2,
       detectIndentation: true,
       value,
+      automaticLayout: true,
     });
     config = MonacoTheme.assignTheme(monaco, config);
     if (language) {
