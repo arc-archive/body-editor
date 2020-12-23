@@ -77,6 +77,14 @@ export declare class BodyMultipartEditorElement extends LitElement {
    * @attribute
    */
   disabled: boolean;
+  /** 
+   * When set it ignores the content type processing.
+   * This disables option "current header value", in raw editor, and disabled information about 
+   * content-type header update.
+   * 
+   * @attribute
+   */
+  ignoreContentType: boolean;
 
   constructor();
 
@@ -109,7 +117,7 @@ export declare class BodyMultipartEditorElement extends LitElement {
   /**
    * Creates the internal model from the passed model
    */
-  [internalFromModel](model: RequestBody.MultipartBody[]): Promise<MultipartBody[]>;
+  [internalFromModel](model: RequestBody.MultipartBody[]): Promise<RequestBody.MultipartBody[]>;
 
   /**
    * Adds a new text part to the list.

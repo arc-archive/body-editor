@@ -198,6 +198,12 @@ export class BodyEditorElement extends ArcResizableMixin(LitElement) {
        * Possible values: `raw,urlEncode,multipart,file`
        */
       types: { type: String, reflect: true },
+      /** 
+       * When set it ignores the content type processing.
+       * This disables option "current header value", in raw editor, and disabled information about 
+       * content-type header update.
+       */
+      ignoreContentType: { type: Boolean },
     };
   }
 
@@ -314,6 +320,7 @@ export class BodyEditorElement extends ArcResizableMixin(LitElement) {
     this.outlined = false;
     this.disabled = false;
     this.autoEncode = false;
+    this.ignoreContentType = false;
     /** 
      * @type {string}
      */
@@ -760,7 +767,7 @@ export class BodyEditorElement extends ArcResizableMixin(LitElement) {
    * @returns {TemplateResult|string} The template for the main editor actions.
    */
   [mainActionsTemplate]() {
-    const { selected, compatibility, outlined, disabled } = this;
+    const { selected, compatibility, outlined, disabled, ignoreContentType } = this;
     if (selected !== 'raw') {
       return '';
     }
@@ -784,7 +791,9 @@ export class BodyEditorElement extends ArcResizableMixin(LitElement) {
           ?compatibility="${compatibility}"
           @activate="${this[mimeTypeChangeHandler]}"
         >
-          <anypoint-item data-type="" ?compatibility="${compatibility}" title="Inherited from the headers">Current headers value</anypoint-item>
+          ${ignoreContentType ? 
+            html`<anypoint-item data-type="" ?compatibility="${compatibility}" title="Do not use any formatting">None</anypoint-item>` : 
+            html`<anypoint-item data-type="" ?compatibility="${compatibility}" title="Inherited from the headers">Current headers value</anypoint-item>`}
           <anypoint-item data-type="application/json" ?compatibility="${compatibility}">JSON</anypoint-item>
           <anypoint-item data-type="application/xml" ?compatibility="${compatibility}">XML</anypoint-item>
           <anypoint-item data-type="text/html" ?compatibility="${compatibility}">HTML</anypoint-item>
@@ -929,7 +938,7 @@ export class BodyEditorElement extends ArcResizableMixin(LitElement) {
    * @returns {TemplateResult} A template for the multipart editor
    */
   [multipartEditorTemplate]() {
-    const { value } = this;
+    const { value, ignoreContentType } = this;
     const model = /** @type MultipartBody[] */ (this[readMetaModel]('multipart'));
     // when the model is generated for the view then the value should not be set
     // as it would override the previously generated model.
@@ -938,6 +947,7 @@ export class BodyEditorElement extends ArcResizableMixin(LitElement) {
       <body-multipart-editor 
         .value="${effectiveValue}"
         .model="${model}"
+        ?ignoreContentType="${ignoreContentType}"
         @change="${this[multipartChangeHandler]}"
       ></body-multipart-editor>
     `;
@@ -947,15 +957,15 @@ export class BodyEditorElement extends ArcResizableMixin(LitElement) {
    * @returns {TemplateResult} A template for the file input editor
    */
   [fileEditorTemplate]() {
-    const { compatibility } = this;
+    const { compatibility, ignoreContentType } = this;
     return html`
     <anypoint-button emphasis="medium" ?compatibility="${compatibility}" @click="${this[pickFileHandler]}">Choose a file</anypoint-button>
     ${this[fileDetailTemplate]()}
     <input type="file" class="binary-hidden" @change="${this[fileChangeHandler]}"/>
-    <p class="mime-info">
+    ${ignoreContentType ? '' : html`<p class="mime-info">
       <arc-icon icon="info" class="info"></arc-icon>
       The content-type header will be updated for this request when the HTTP message is generated.
-    </p>
+    </p>`}
     `;
   }
 

@@ -155,6 +155,15 @@ export declare class BodyEditorElement extends ArcResizableMixin(LitElement) {
    */
   readonly hasFile: boolean;
 
+  /** 
+   * When set it ignores the content type processing.
+   * This disables option "current header value", in raw editor, and disabled information about 
+   * content-type header update.
+   * 
+   * @attribute
+   */
+  ignoreContentType: boolean;
+
   constructor();
 
   /**

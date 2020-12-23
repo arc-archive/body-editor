@@ -123,6 +123,12 @@ export class BodyMultipartEditorElement extends LitElement {
        * When set all controls are disabled in the form
        */
       disabled: { type: Boolean },
+      /** 
+       * When set it ignores the content type processing.
+       * This disables option "current header value", in raw editor, and disabled information about 
+       * content-type header update.
+       */
+      ignoreContentType: { type: Boolean },
     }
   }
 
@@ -196,6 +202,7 @@ export class BodyMultipartEditorElement extends LitElement {
     this.readOnly = false;
     this.disabled = false;
     this.autoEncode = false;
+    this.ignoreContentType = false;
   }
 
   /**
@@ -539,13 +546,14 @@ export class BodyMultipartEditorElement extends LitElement {
     if (!hasSupport) {
       return html`<p>This browser does not support this editor</p>`;
     }
+    const { ignoreContentType } = this;
     return html`
     ${this[formTemplate]()}
     ${this[addParamTemplate]()}
-    <p class="mime-info">
+    ${ignoreContentType ? '' : html`<p class="mime-info">
       <arc-icon icon="info" class="info"></arc-icon>
       The content-type header will be updated for this request when the HTTP message is generated.
-    </p>
+    </p>`}
     `;
   }
 

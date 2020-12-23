@@ -40,7 +40,7 @@ export class BodyRawEditorElement extends ArcResizableMixin(LitElement) {
   [monacoInstance]: string;
   [valueValue]: string;
 
-  readonly editor: monaco.editor.IStandaloneCodeEditor;
+  get editor(): monaco.editor.IStandaloneCodeEditor;
 
   constructor();
 
