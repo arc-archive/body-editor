@@ -86,3 +86,6 @@ export const dragOverHandler = Symbol('dragOverHandler');
 export const resizeHandler = Symbol('resizeHandler');
 export const refreshDebouncer = Symbol('refreshDebouncer');
 export const refreshEditor = Symbol('refreshEditor');
+export const enabledEditorsValue = Symbol('enabledEditorsValue');
+export const effectiveEditorsValue = Symbol('effectiveEditorsValue');
+export const computeEffectiveEditors = Symbol('computeEffectiveEditors');

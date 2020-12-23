@@ -79,6 +79,9 @@ import {
   mimeTypeChangeHandler,
   dropHandler,
   dragOverHandler,
+  enabledEditorsValue,
+  effectiveEditorsValue,
+  computeEffectiveEditors,
 } from './internals.js';
 import '../body-formdata-editor.js';
 import '../body-multipart-editor.js';
@@ -90,10 +93,11 @@ import '../body-raw-editor.js';
 /** @typedef {import('@advanced-rest-client/arc-types').RequestBody.MultipartBody} MultipartBody */
 /** @typedef {import('@advanced-rest-client/arc-types').RequestBody.RawBody} RawBody */
 /** @typedef {import('@advanced-rest-client/arc-types').ApiTypes.ApiType} ApiType */
+/** @typedef {import('@advanced-rest-client/code-mirror').CodeMirrorElement} CodeMirrorElement */
 /** @typedef {import('./BodyFormdataEditorElement').BodyFormdataEditorElement} BodyFormdataEditorElement */
 /** @typedef {import('./BodyMultipartEditorElement').BodyMultipartEditorElement} BodyMultipartEditorElement */
 /** @typedef {import('./BodyRawEditorElement').BodyRawEditorElement} BodyRawEditorElement */
-/** @typedef {import('@advanced-rest-client/code-mirror').CodeMirrorElement} CodeMirrorElement */
+/** @typedef {import('./types').EditorType} EditorType */
 
 /**
  * @param {Event} e
@@ -103,7 +107,10 @@ function cancelEvent(e) {
   e.stopPropagation();
 }
 
-export const editorTypes = [
+/** 
+ * @type {Readonly<EditorType[]>}
+ */
+export const editorTypes = Object.freeze([
   {
     id: 'raw',
     label: 'Raw input',
@@ -124,7 +131,7 @@ export const editorTypes = [
     label: 'File',
     title: 'Allows to choose any binary data'
   }
-];
+]);
 
 /**
  * @fires change When the value and the model change
@@ -185,6 +192,12 @@ export class BodyEditorElement extends ArcResizableMixin(LitElement) {
        * outside the components. See the demo page sources for an example.
        */
       editorType: { type: String },
+      /** 
+       * The list of coma separated names of the editors to enable.
+       * This must be the list of `id` values from the available editors.
+       * Possible values: `raw,urlEncode,multipart,file`
+       */
+      types: { type: String, reflect: true },
     };
   }
 
@@ -269,6 +282,27 @@ export class BodyEditorElement extends ArcResizableMixin(LitElement) {
     }
     this[editorTypeValue] = value;
     this.requestUpdate();
+  }
+
+  get types() {
+    return this[enabledEditorsValue];
+  }
+
+  set types(value) {
+    const old = this[enabledEditorsValue];
+    if (old === value) {
+      return;
+    }
+    this[enabledEditorsValue] = value;
+    this[effectiveEditorsValue] = this[computeEffectiveEditors](value);
+    this.requestUpdate('types', old);
+  }
+
+  /**
+   * @returns {Readonly<EditorType[]>} The final list of editors to render.
+   */
+  get effectiveEditors() {
+    return this[effectiveEditorsValue] || editorTypes;
   }
 
   constructor() {
@@ -662,6 +696,21 @@ export class BodyEditorElement extends ArcResizableMixin(LitElement) {
   [dragOverHandler](e) {
     e.preventDefault();
   }
+
+  /**
+   * Handles the change to the `enabledEditors` property and, when set, computes a list of
+   * editors to enable in the view. The resulted list of a sublist of the `editorTypes` list.
+   * @param {string=} list
+   * @returns {Readonly<EditorType[]>|undefined}
+   */
+  [computeEffectiveEditors](list) {
+    if (!list || typeof list !== 'string') {
+      return undefined;
+    }
+    const parts = list.split(',').map((item) => item.trim());
+    const result = editorTypes.filter((item) => parts.includes(item.id));
+    return Object.freeze(result);
+  }
   
   render() {
     return html`
@@ -769,9 +818,9 @@ export class BodyEditorElement extends ArcResizableMixin(LitElement) {
   }
 
   [bodyTypeOptionsTemplate]() {
-    const { compatibility } = this;
+    const { compatibility, effectiveEditors } = this;
     return html`
-    ${editorTypes.map((info) => html`<anypoint-item data-type="${info.id}" ?compatibility="${compatibility}" title="${info.title}">${info.label}</anypoint-item>`)}
+    ${effectiveEditors.map((info) => html`<anypoint-item data-type="${info.id}" ?compatibility="${compatibility}" title="${info.title}">${info.label}</anypoint-item>`)}
     `;
   }
 

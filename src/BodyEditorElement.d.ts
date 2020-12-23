@@ -48,15 +48,15 @@ import {
   codeMirrorChangeHandler,
   mainActionsTemplate,
   mimeTypeChangeHandler,
+  dropHandler,
+  dragOverHandler,
+  enabledEditorsValue,
+  effectiveEditorsValue,
+  computeEffectiveEditors,
 } from './internals.js';
+import { EditorType } from './types';
 
-export declare interface EditorInfo {
-  id: string;
-  label: string;
-  title: string;
-}
-
-export const editorTypes: EditorInfo[];
+export const editorTypes: Readonly<EditorType[]>;
 export declare type allowedEditors = 'raw' | 'urlEncode' | 'multipart' | 'file';
 
 /**
@@ -128,6 +128,20 @@ export declare class BodyEditorElement extends ArcResizableMixin(LitElement) {
    */
   editorType: string;
   [editorTypeValue]: string;
+  /** 
+   * The list of coma separated names of the editors to enable.
+   * This must be the list of `id` values from the available editors.
+   * Possible values: `raw,urlEncode,multipart,file`.
+   * 
+   * @attribute
+   */
+  types?: string;
+  [enabledEditorsValue]?: string;
+  /**
+   * The final list of editors to render.
+   */
+  get effectiveEditors(): Readonly<EditorType[]>;
+  [effectiveEditorsValue]: Readonly<EditorType[]>;
 
   [previewDialogOpened]: boolean;
   [generatingPreview]: boolean;
@@ -254,6 +268,23 @@ export declare class BodyEditorElement extends ArcResizableMixin(LitElement) {
    * A handler for the mime type selection.
    */
   [mimeTypeChangeHandler](e: CustomEvent): void;
+
+  /**
+   * 
+   * @param {DragEvent} e 
+   */
+  [dropHandler](e: DragEvent): Promise<void>;
+
+  /**
+   * @param {DragEvent} e 
+   */
+  [dragOverHandler](e: DragEvent): void;
+
+  /**
+   * Handles the change to the `enabledEditors` property and, when set, computes a list of
+   * editors to enable in the view. The resulted list of a sublist of the `editorTypes` list.
+   */
+  [computeEffectiveEditors](list?: string): Readonly<EditorType[]>|undefined;
   
   render(): TemplateResult;
 

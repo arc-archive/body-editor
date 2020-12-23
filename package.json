@@ -1,7 +1,7 @@
 {
   "name": "@advanced-rest-client/body-editor",
   "description": "HTTP body editor for a HTTP request made as a web component",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "license": "Apache-2.0",
   "main": "index.js",
   "module": "index.js",
@@ -26,7 +26,7 @@
     "email": "arc@mulesoft.com"
   },
   "dependencies": {
-    "@advanced-rest-client/arc-events": "^0.2.10",
+    "@advanced-rest-client/arc-events": "^0.2.11",
     "@advanced-rest-client/arc-icons": "^3.2.2",
     "@advanced-rest-client/arc-resizable-mixin": "^1.2.0",
     "@advanced-rest-client/code-mirror": "^3.1.4",
@@ -47,7 +47,7 @@
   "devDependencies": {
     "@advanced-rest-client/arc-data-generator": "^3.1.12",
     "@advanced-rest-client/arc-demo-helper": "^2.2.3",
-    "@advanced-rest-client/arc-types": "^0.2.38",
+    "@advanced-rest-client/arc-types": "^0.2.39",
     "@open-wc/eslint-config": "^4.0.1",
     "@open-wc/testing": "^2.5.32",
     "@web/dev-server": "^0.1.0",
