@@ -2,6 +2,9 @@ import { assert } from '@open-wc/testing';
 import { BodyProcessor } from '../index.js';
 
 /** @typedef {import('@advanced-rest-client/arc-types').ArcRequest.ARCSavedRequest} ARCSavedRequest */
+/** @typedef {import('@advanced-rest-client/arc-types').ArcRequest.ARCHistoryRequest} ARCHistoryRequest */
+/** @typedef {import('@advanced-rest-client/arc-types').WebSocket.WebsocketRequest} WebsocketRequest */
+/** @typedef {import('@advanced-rest-client/arc-types').WebSocket.WebsocketLog} WebsocketLog */
 /** @typedef {import('@advanced-rest-client/arc-types').ArcResponse.Response} ArcResponse */
 /** @typedef {import('@advanced-rest-client/arc-types').ArcResponse.TransformedPayload} TransformedPayload */
 
@@ -55,7 +58,7 @@ describe('BodyProcessor', () => {
         ...initRequest,
         payload: fd,
       };
-      const result = await BodyProcessor.payloadToString(obj);
+      const result = /** @type ARCHistoryRequest */ (await BodyProcessor.payloadToString(obj));
       assert.typeOf(result.multipart, 'array');
       assert.lengthOf(result.multipart, 3);
     });
@@ -235,14 +238,14 @@ describe('BodyProcessor', () => {
     });
 
     it('restores a form data', () => {
-      const result = BodyProcessor.restorePayload({
+      const result = /** @type ARCHistoryRequest */ (BodyProcessor.restorePayload({
         ...initRequest,
         multipart: [{
           isFile: false,
           name: 'test-name',
           value: 'test-value'
         }]
-      });
+      }));
       assert.ok(result.payload);
       // @ts-ignore
       const data = result.payload.get('test-name');
@@ -269,70 +272,148 @@ describe('BodyProcessor', () => {
   });
 
   describe('stringifyRequest()', () => {
-    it('processes the request payload', async () => {
-      const b = new Blob(['***** ***'], {type: 'text/plain'});
-      const obj = {
-        ...initRequest,
-        payload: b,
-      };
-      const result = await BodyProcessor.stringifyRequest(obj);
-      assert.equal(result.blob, 'data:text/plain;base64,KioqKiogKioq');
+    describe('Request object', () => {
+      it('processes the request payload', async () => {
+        const b = new Blob(['***** ***'], {type: 'text/plain'});
+        const obj = {
+          ...initRequest,
+          payload: b,
+        };
+        const result = await BodyProcessor.stringifyRequest(obj);
+        assert.equal(result.blob, 'data:text/plain;base64,KioqKiogKioq');
+      });
+  
+      it('processes the response payload', async () => {
+        const b = new Blob(['***** ***'], {type: 'text/plain'});
+        const obj = /** @type ARCHistoryRequest */ ({
+          ...initRequest,
+          payload: b,
+        });
+        // @ts-ignore
+        obj.response.payload = b;
+        const result = await BodyProcessor.stringifyRequest(obj);
+        assert.equal(/** @type ArcResponse */ (result.response).blob, 'data:text/plain;base64,KioqKiogKioq');
+      });
+  
+      it('processes the response payload with ArrayBuffer', async () => {
+        const encoder = new TextEncoder();
+        const view = encoder.encode('test');
+        const obj = /** @type ARCHistoryRequest */ ({
+          ...initRequest,
+        });
+        obj.response.payload = view.buffer;
+        const result = await BodyProcessor.stringifyRequest(obj);
+        const body = /** @type TransformedPayload */ (result.response.payload);
+        assert.equal(body.type, 'ArrayBuffer');
+        assert.typeOf(body.data, 'array');
+      });
     });
+    
+    describe('Websocket object', () => {
+      it('keep the message when string', async () => {
+        const obj = /** @type WebsocketRequest */ ({
+          kind: 'ARC#WebsocketRequest',
+          url: 'test',
+          payload: 'test-message',
+        });
+        const result = await BodyProcessor.stringifyRequest(obj);
+        assert.equal(result.payload, 'test-message');
+      });
 
-    it('processes the response payload', async () => {
-      const b = new Blob(['***** ***'], {type: 'text/plain'});
-      const obj = {
-        ...initRequest,
-        payload: b,
-      };
-      // @ts-ignore
-      obj.response.payload = b;
-      const result = await BodyProcessor.stringifyRequest(obj);
-      assert.equal(result.response.blob, 'data:text/plain;base64,KioqKiogKioq');
-    });
+      it('processes a blob message', async () => {
+        const payload = new Blob(['***** ***'], {type: 'text/plain'});
+        const obj = /** @type WebsocketRequest */ ({
+          kind: 'ARC#WebsocketRequest',
+          url: 'test',
+          payload,
+        });
+        const result = await BodyProcessor.stringifyRequest(obj);
+        assert.isUndefined(result.payload, 'payload is removed');
+        assert.equal(result.blob, 'data:text/plain;base64,KioqKiogKioq');
+      });
 
-    it('processes the response payload with ArrayBuffer', async () => {
-      const encoder = new TextEncoder();
-      const view = encoder.encode('test');
-      const obj = {
-        ...initRequest,
-      };
-      obj.response.payload = view.buffer;
-      const result = await BodyProcessor.stringifyRequest(obj);
-      const body = /** @type TransformedPayload */ (result.response.payload);
-      assert.equal(body.type, 'ArrayBuffer');
-      assert.typeOf(body.data, 'array');
+      it('processes an ArrayBuffer message', async () => {
+        const encoder = new TextEncoder();
+        const view = encoder.encode('***** ***');
+        const obj = /** @type WebsocketRequest */ ({
+          kind: 'ARC#WebsocketRequest',
+          url: 'test',
+          payload: view.buffer,
+        });
+        const result = await BodyProcessor.stringifyRequest(obj);
+        const body = /** @type TransformedPayload */ (result.payload);
+        assert.equal(body.type, 'ArrayBuffer');
+        assert.typeOf(body.data, 'array');
+      });
     });
   });
 
   describe('restoreRequest()', () => {
-    it('processes the request payload', async () => {
-      const obj = {
-        ...initRequest,
-        blob: 'data:text/plain;base64,KioqKiogKioq',
-      };
-      const result = BodyProcessor.restoreRequest(obj);
-      assert.typeOf(result.payload, 'blob');
+    describe('Request object', () => {
+      it('processes the request payload', async () => {
+        const obj = /** @type ARCHistoryRequest */ ({
+          ...initRequest,
+          blob: 'data:text/plain;base64,KioqKiogKioq',
+        });
+        const result = BodyProcessor.restoreRequest(obj);
+        assert.typeOf(result.payload, 'blob');
+      });
+
+      it('processes the response payload', async () => {
+        const obj = /** @type ARCHistoryRequest */ ({
+          ...initRequest,
+        });
+        
+        /** @type ArcResponse */ (obj.response).blob = 'data:text/plain;base64,KioqKiogKioq';
+        const result = BodyProcessor.restoreRequest(obj);
+        assert.typeOf(/** @type ArcResponse */ (result.response).payload, 'blob');
+      });
+
+      it('restores the response payload with ArrayBuffer', async () => {
+        const encoder = new TextEncoder();
+        const view = encoder.encode('test-ab');
+        const obj = {
+          ...initRequest,
+        };
+        obj.response.payload = BodyProcessor.arrayBufferToTransformed(view.buffer);
+        const result = BodyProcessor.restoreRequest(obj);
+        assert.typeOf(result.response.payload, 'ArrayBuffer');
+      });
     });
 
-    it('processes the response payload', async () => {
-      const obj = {
-        ...initRequest,
-      };
-      obj.response.blob = 'data:text/plain;base64,KioqKiogKioq';
-      const result = BodyProcessor.restoreRequest(obj);
-      assert.typeOf(result.response.payload, 'blob');
-    });
+    describe('Websocket object', () => {
+      it('keep the message when string', async () => {
+        const obj = /** @type WebsocketRequest */ ({
+          kind: 'ARC#WebsocketRequest',
+          url: 'test',
+          payload: 'test-message',
+        });
+        const result = BodyProcessor.restoreRequest(obj);
+        assert.equal(result.payload, 'test-message');
+      });
 
-    it('restores the response payload with ArrayBuffer', async () => {
-      const encoder = new TextEncoder();
-      const view = encoder.encode('test-ab');
-      const obj = {
-        ...initRequest,
-      };
-      obj.response.payload = BodyProcessor.arrayBufferToTransformed(view.buffer);
-      const result = BodyProcessor.restoreRequest(obj);
-      assert.typeOf(result.response.payload, 'ArrayBuffer');
+      it('processes a blob message', async () => {
+        const obj = /** @type WebsocketRequest */ ({
+          kind: 'ARC#WebsocketRequest',
+          url: 'test',
+          payload: undefined,
+          blob: 'data:text/plain;base64,KioqKiogKioq',
+        });
+        const result = BodyProcessor.restoreRequest(obj);
+        assert.typeOf(result.payload, 'blob');
+      });
+
+      it('processes an ArrayBuffer message', async () => {
+        const encoder = new TextEncoder();
+        const view = encoder.encode('***** ***');
+        const obj = /** @type WebsocketRequest */ ({
+          kind: 'ARC#WebsocketRequest',
+          url: 'test',
+          payload: BodyProcessor.arrayBufferToTransformed(view.buffer),
+        });
+        const result = BodyProcessor.restoreRequest(obj);
+        assert.typeOf(result.payload, 'ArrayBuffer');
+      });
     });
   });
 
@@ -386,6 +467,111 @@ describe('BodyProcessor', () => {
       const info = {};
       const result = BodyProcessor.transformedToPayload(info);
       assert.isUndefined(result);
+    });
+  });
+
+  describe('stringifyWebsocketLogs()', () => {
+    it('returns empty array when no input', async () => {
+      const result = await BodyProcessor.stringifyWebsocketLogs(undefined);
+      assert.deepEqual(result, []);
+    });
+
+    it('keeps string data', async () => {
+      const result = await BodyProcessor.stringifyWebsocketLogs([{
+        created: 1,
+        direction: 'in',
+        message: 'test',
+        size: 4,
+      }]);
+      assert.equal(result[0].message, 'test');
+    });
+
+    it('ignores logs without the message', async () => {
+      const result = await BodyProcessor.stringifyWebsocketLogs([{
+        created: 1,
+        direction: 'in',
+        message: undefined,
+        size: 4,
+      }]);
+      assert.isUndefined(result[0].message);
+    });
+
+    it('transforms blob message', async () => {
+      const message = new Blob(['***** ***'], {type: 'text/plain'});
+      const result = await BodyProcessor.stringifyWebsocketLogs([{
+        created: 1,
+        direction: 'in',
+        message,
+        size: 4,
+      }]);
+      assert.isUndefined(result[0].message, 'the message is removed');
+      assert.equal(result[0].blob, 'data:text/plain;base64,KioqKiogKioq', 'has the blob property');
+    });
+
+    it('transforms array buffer message', async () => {
+      const encoder = new TextEncoder();
+      const view = encoder.encode('test');
+      const result = await BodyProcessor.stringifyWebsocketLogs([{
+        created: 1,
+        direction: 'in',
+        message: view.buffer,
+        size: 4,
+      }]);
+      const body = /** @type TransformedPayload */ (result[0].message);
+      assert.equal(body.type, 'ArrayBuffer');
+      assert.typeOf(body.data, 'array');
+    });
+  });
+
+  describe('restoreWebsocketLogs()', () => {
+    it('returns empty array when no input', async () => {
+      const result = BodyProcessor.restoreWebsocketLogs(undefined);
+      assert.deepEqual(result, []);
+    });
+
+    it('keeps string data', async () => {
+      const result = BodyProcessor.restoreWebsocketLogs([{
+        created: 1,
+        direction: 'in',
+        message: 'test',
+        size: 4,
+      }]);
+      assert.equal(result[0].message, 'test');
+    });
+
+    it('ignores when no message', async () => {
+      const result = BodyProcessor.restoreWebsocketLogs([{
+        created: 1,
+        direction: 'in',
+        message: undefined,
+        size: 4,
+      }]);
+      assert.isUndefined(result[0].message);
+    });
+
+    it('restores blob message', async () => {
+      const result = BodyProcessor.restoreWebsocketLogs([{
+        created: 1,
+        direction: 'in',
+        message: undefined,
+        blob: 'data:text/plain;base64,KioqKiogKioq',
+        size: 4,
+      }]);
+      assert.isUndefined(result[0].blob, 'the blob property is removed');
+      assert.typeOf(result[0].message, 'blob', 'has the restored value');
+    });
+
+    it('restores an ArrayBuffer message', async () => {
+      const encoder = new TextEncoder();
+      const view = encoder.encode('***** ***');
+      const obj = /** @type WebsocketLog */ ({
+        created: 1,
+        direction: 'in',
+        size: 4,
+        message: BodyProcessor.arrayBufferToTransformed(view.buffer),
+      });
+      const result = BodyProcessor.restoreWebsocketLogs([obj]);
+      assert.typeOf(result[0].message, 'ArrayBuffer');
     });
   });
 });

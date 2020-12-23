@@ -4,6 +4,8 @@
 /** @typedef {import('@advanced-rest-client/arc-types').ArcResponse.Response} ArcResponse */
 /** @typedef {import('@advanced-rest-client/arc-types').RequestBody.MultipartBody} MultipartBody */
 /** @typedef {import('@advanced-rest-client/arc-types').ArcResponse.TransformedPayload} TransformedPayload */
+/** @typedef {import('@advanced-rest-client/arc-types').WebSocket.WebsocketRequest} WebsocketRequest */
+/** @typedef {import('@advanced-rest-client/arc-types').WebSocket.WebsocketLog} WebsocketLog */
 
 /**
  * A helper class that processes payload before saving it to a  datastore or a file.
@@ -15,13 +17,13 @@ export class BodyProcessor {
    * Transforms the request payload to string if needed and the response payload when set.
    * Note, this returns copy of the object if any transformation is applied.
    *
-   * @param {ARCHistoryRequest|ARCSavedRequest} request ArcRequest object
-   * @return {Promise<ARCHistoryRequest|ARCSavedRequest>} A copy of the request object with transformed payload
+   * @param {ARCHistoryRequest|ARCSavedRequest|WebsocketRequest} request ArcRequest object
+   * @return {Promise<ARCHistoryRequest|ARCSavedRequest|WebsocketRequest>} A copy of the request object with transformed payload
    */
   static async stringifyRequest(request) {
     const cp = /** @type ARCHistoryRequest */ (await BodyProcessor.payloadToString(request));
     if (cp.response && cp.response.payload) {
-      cp.response = /** @type ArcResponse */ (await this.payloadToString(cp.response));
+      cp.response = /** @type ArcResponse */ (await BodyProcessor.payloadToString(/** @type ArcResponse */ (cp.response)));
     }
     return cp;
   }
@@ -29,13 +31,13 @@ export class BodyProcessor {
   /**
    * Restores the payload into its original format from both the request and response objects.
    * 
-   * @param {ARCHistoryRequest|ARCSavedRequest} request ArcRequest object
-   * @return {ARCHistoryRequest|ARCSavedRequest} Processed request
+   * @param {ARCHistoryRequest|ARCSavedRequest|WebsocketRequest} request ArcRequest object
+   * @return {ARCHistoryRequest|ARCSavedRequest|WebsocketRequest} Processed request
    */
   static restoreRequest(request) {
     const processed = /** @type ARCHistoryRequest */ (BodyProcessor.restorePayload(request));
     if (processed.response) {
-      processed.response = /** @type ArcResponse */ (BodyProcessor.restorePayload(request.response));
+      processed.response = /** @type ArcResponse */ (BodyProcessor.restorePayload(/** @type ArcResponse */ (processed.response)));
     }
     return processed;
   }
@@ -44,15 +46,15 @@ export class BodyProcessor {
    * Transforms request payload to string if needed.
    * Note, this returns copy of the object if any transformation is applied.
    *
-   * @param {ARCHistoryRequest|ARCSavedRequest|ArcResponse} request ArcRequest object
-   * @return {Promise<ARCHistoryRequest|ARCSavedRequest|ArcResponse>} A copy of the request object with transformed payload
+   * @param {ARCHistoryRequest|ARCSavedRequest|ArcResponse|WebsocketRequest} request ArcRequest object
+   * @return {Promise<ARCHistoryRequest|ARCSavedRequest|ArcResponse|WebsocketRequest>} A copy of the request object with transformed payload
    */
   static async payloadToString(request) {
     if (!request.payload) {
       return request;
     }
     if (request.payload instanceof FormData) {
-      const data = { ...request };
+      const data = /** @type ARCHistoryRequest|ARCSavedRequest|ArcResponse */ ({ ...request });
       const body = /** @type FormData */ (data.payload);
       // @ts-ignore
       if (!body.entries) {
@@ -192,18 +194,19 @@ export class BodyProcessor {
   /**
    * Restores the payload into its original format.
    * 
-   * @param {ARCHistoryRequest|ARCSavedRequest|ArcResponse} request ArcRequest object
-   * @return {ARCHistoryRequest|ARCSavedRequest|ArcResponse} Processed request
+   * @param {ARCHistoryRequest|ARCSavedRequest|ArcResponse|WebsocketRequest} request ArcRequest object
+   * @return {ARCHistoryRequest|ARCSavedRequest|ArcResponse|WebsocketRequest} Processed request
    */
   static restorePayload(request) {
-    if (request.multipart) {
+    const typedSaved = /** @type ARCSavedRequest */ (request);
+    if (typedSaved.multipart) {
       try {
-        request.payload = BodyProcessor.restoreMultipart(request.multipart);
+        request.payload = BodyProcessor.restoreMultipart(typedSaved.multipart);
       } catch (e) {
         // eslint-disable-next-line no-console
         console.warn('Unable to restore payload.', e);
       }
-      delete request.multipart;
+      delete typedSaved.multipart;
       return request;
     } 
     if (request.blob) {
@@ -310,6 +313,82 @@ export class BodyProcessor {
         reject(new Error('Unable to convert blob to string.'));
       };
       reader.readAsText(blob);
+    });
+  }
+
+  /**
+   * Transforms the web socket connection logs for database storing.
+   *
+   * @param {WebsocketLog[]} logs The execution logs for the web socket connection.
+   * @return {Promise<WebsocketLog[]>} A copy of the list of logs with the transformed output.
+   */
+  static async stringifyWebsocketLogs(logs) {
+    if (!Array.isArray(logs)) {
+      return [];
+    }
+    const ps = logs.map((log) => BodyProcessor.stringifyWebsocketLog(log));
+    const result = await Promise.all(ps);
+    return result;
+  }
+
+  /**
+   * Transforms a web socket log for database storing.
+   *
+   * @param {WebsocketLog} log The message to transform
+   * @return {Promise<WebsocketLog>} A copy of the log with the transformed output.
+   */
+  static async stringifyWebsocketLog(log) {
+    const { message } = log;
+    if (!message) {
+      return log;
+    }
+    if (message instanceof Blob) {
+      const data = { ...log };
+      const result = await BodyProcessor.blobToString(message);
+      data.message = undefined;
+      data.blob = result;
+      return data;
+    }
+    const transformed = BodyProcessor.bufferToTransformed(message) || BodyProcessor.arrayBufferToTransformed(message);
+    if (transformed) {
+      const data = { ...log };
+      data.message = transformed;
+      return data;
+    }
+    return log;
+  }
+
+  /**
+   * Restores previously transformed websocket logs.
+   *
+   * @param {WebsocketLog[]} logs The execution logs for the web socket connection.
+   * @return {WebsocketLog[]} A copy of the list of logs with the restored output.
+   */
+  static restoreWebsocketLogs(logs) {
+    if (!Array.isArray(logs)) {
+      return [];
+    }
+    return logs.map((log) => {
+      const item = {...log};
+      if (item.blob) {
+        try {
+          item.message = BodyProcessor.dataURLtoBlob(item.blob);
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.warn('Unable to restore websocket message.', e);
+        }
+        delete item.blob;
+        return item;
+      }
+      if (!item.message || typeof item.message === 'string') {
+        return item;
+      }
+      const restored = BodyProcessor.transformedToPayload(item.message);
+      if (restored) {
+        item.message = restored;
+        return item;
+      }
+      return item;
     });
   }
 }

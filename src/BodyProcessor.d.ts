@@ -1,5 +1,6 @@
-import { ArcRequest, RequestBody } from '@advanced-rest-client/arc-types';
+import { ArcRequest, ArcResponse, RequestBody } from '@advanced-rest-client/arc-types';
 import { TransformedPayload } from '@advanced-rest-client/arc-types/src/request/ArcResponse';
+import { WebsocketLog, WebsocketRequest } from '@advanced-rest-client/arc-types/src/request/WebSocket';
 
 /**
  * A helper class that processes payload before saving it to a
@@ -16,7 +17,7 @@ export declare class BodyProcessor {
    * @param request ArcRequest object
    * @returns A copy of the request object with transformed payload
    */
-  static stringifyRequest(request: ArcRequest.ARCHistoryRequest|ArcRequest.ARCSavedRequest): Promise<ArcRequest.ARCHistoryRequest|ArcRequest.ARCSavedRequest>;
+  static stringifyRequest<T extends ArcRequest.ArcBaseRequest|WebsocketRequest>(request: T): Promise<T>;
 
   /**
    * Restores the payload into its original format from both the request and response objects.
@@ -24,7 +25,7 @@ export declare class BodyProcessor {
    * @param request ArcRequest object
    * @returns Processed request
    */
-  static restoreRequest(request: ArcRequest.ARCHistoryRequest|ArcRequest.ARCSavedRequest): ArcRequest.ARCHistoryRequest|ArcRequest.ARCSavedRequest;
+  static restoreRequest<T extends ArcRequest.ArcBaseRequest|WebsocketRequest>(request: T): T;
 
   /**
    * Transforms request payload to string if needed.
@@ -33,7 +34,7 @@ export declare class BodyProcessor {
    * @param request ArcRequest object
    * @returns Promise resolved when payload has been processed.
    */
-  static payloadToString(request: ArcRequest.ARCHistoryRequest|ArcRequest.ARCSavedRequest): Promise<ArcRequest.ARCHistoryRequest|ArcRequest.ARCSavedRequest>;
+  static payloadToString<T extends ArcRequest.ArcBaseRequest|ArcResponse.Response|WebsocketRequest>(request: T): Promise<T>;
 
   /**
    * When the passed argument is a NodeJS buffer it creates an object describing the buffer
@@ -84,7 +85,7 @@ export declare class BodyProcessor {
    * @param request ArcRequest object
    * @returns Processed request
    */
-  static restorePayload(request: ArcRequest.ARCHistoryRequest|ArcRequest.ARCSavedRequest): ArcRequest.ARCHistoryRequest|ArcRequest.ARCSavedRequest;
+  static restorePayload<T extends ArcRequest.ArcBaseRequest|ArcResponse.Response|WebsocketRequest>(request: T): T;
 
   /**
    * Handles potential `TransformedPayload` and returns the original data
@@ -117,4 +118,28 @@ export declare class BodyProcessor {
    * @returns Promise resolved to a text value of the file
    */
   static fileToString(blob: File): Promise<string>;
+
+  /**
+   * Transforms the web socket connection logs for database storing.
+   *
+   * @param logs The execution logs for the web socket connection.
+   * @returns A copy of the list of logs with the transformed output.
+   */
+  static stringifyWebsocketLogs(logs: WebsocketLog[]): Promise<WebsocketLog[]>;
+
+  /**
+   * Transforms a web socket log for database storing.
+   *
+   * @param log The message to transform
+   * @returns A copy of the log with the transformed output.
+   */
+  static stringifyWebsocketLog(log: WebsocketLog): Promise<WebsocketLog>;
+
+  /**
+   * Restores previously transformed websocket logs.
+   *
+   * @param {WebsocketLog[]} logs The execution logs for the web socket connection.
+   * @return {WebsocketLog[]} A copy of the list of logs with the restored output.
+   */
+  static restoreWebsocketLogs(logs: WebsocketLog[]): WebsocketLog[];
 }
