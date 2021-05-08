@@ -16,7 +16,7 @@ export default css`
 
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 
 body-raw-editor {
