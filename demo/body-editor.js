@@ -1,7 +1,6 @@
 import { html } from 'lit-html';
 import { ifDefined } from 'lit-html/directives/if-defined.js';
 import { DemoPage } from '@advanced-rest-client/arc-demo-helper';
-// import { DataGenerator } from '@advanced-rest-client/arc-data-generator';
 import { RequestEventTypes } from '@advanced-rest-client/arc-events';
 import '@anypoint-web-components/anypoint-switch/anypoint-switch.js';
 import { MonacoLoader } from '@advanced-rest-client/monaco-support';
@@ -12,13 +11,12 @@ import '../body-editor.js';
 
 const valueKey = 'demo.bodyEditor.value';
 const modelKey = 'demo.bodyEditor.model';
-const editorKey = 'demo.bodyEditor.editor';
 
 class ComponentPage extends DemoPage {
   constructor() {
     super();
     this.initObservableProperties([
-      'autoEncode', 'value', 'contentType', 'editorType', 'initializing'
+      'autoEncode', 'value', 'contentType', 'initializing'
     ]);
     this.componentName = 'body-editor';
     this.renderViewControls = true;
@@ -26,23 +24,21 @@ class ComponentPage extends DemoPage {
     this.initializing = true;
     this.value = undefined;
     this.meta = undefined;
-    this.editorType = undefined;
     // this.generator = new DataGenerator();
     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
       this.darkThemeActive = true;
     }
 
-    this.valueChange = this.valueChange.bind(this)
-    this.selectHandler = this.selectHandler.bind(this)
-    this.contentTypeChanged = this.contentTypeChanged.bind(this)
-    this.editorTypeChanged = this.editorTypeChanged.bind(this)
+    this.valueChange = this.valueChange.bind(this);
+    this.selectHandler = this.selectHandler.bind(this);
+    this.contentTypeChanged = this.contentTypeChanged.bind(this);
     this.restoreLocalValues();
     window.addEventListener(RequestEventTypes.State.contentTypeChange, this.editorMimeHandler.bind(this))
   }
 
   async restoreLocalValues() {
     await this.restoreValue();
-    await this.restoreEditor();
+    await this.loadMonaco();
     const modelRaw = window.localStorage.getItem(modelKey);
     if (modelRaw) {
       try {
@@ -78,48 +74,6 @@ class ComponentPage extends DemoPage {
       return;
     }
     this.value = valueRaw;
-  }
-
-  async restoreEditor() {
-    const allowed = ['CodeMirror', 'Monaco'];
-    const valueRaw = window.localStorage.getItem(editorKey);
-    if (!allowed.includes(valueRaw)) {
-      await this.loadMonaco();
-      return;
-    }
-    this.editorType = valueRaw;
-    if (valueRaw === 'CodeMirror') {
-      await this.loadCodeMirror();
-    } else {
-      await this.loadMonaco();
-    }
-  }
-
-  async loadCodeMirror() {
-    /* global CodeMirror */
-    const prefix = '../node_modules/codemirror/';
-    await this.loadScript(`${prefix}lib/codemirror.js`);
-    const scripts = [
-      '../node_modules/jsonlint/lib/jsonlint.js',
-      // `${prefix}lib/codemirror.js`,
-      `${prefix}addon/mode/loadmode.js`,
-      `${prefix}mode/meta.js`,
-      `${prefix}mode/javascript/javascript.js`,
-      `${prefix}mode/xml/xml.js`,
-      `${prefix}mode/htmlmixed/htmlmixed.js`,
-      `${prefix}addon/lint/lint.js`,
-      `${prefix}addon/lint/json-lint.js`,
-    ];
-    const ps = scripts.map((url) => this.loadScript(url));
-    await Promise.all(ps);
-    await this.loadScript('../node_modules/@advanced-rest-client/code-mirror-linter/code-mirror-linter.js', true);
-    const link = document.createElement('link');
-    link.type = "text/css";
-    link.rel = "stylesheet";
-    link.href = '../node_modules/codemirror/addon/lint/lint.css';
-    document.head.appendChild(link);
-    // @ts-ignore
-    CodeMirror.modeURL = '../node_modules/codemirror/mode/%N/%N.js';
   }
 
   /**
@@ -221,21 +175,12 @@ class ComponentPage extends DemoPage {
   editorMimeHandler(e) {
     this.contentType = e.changedValue;
   }
-  
-  /**
-   * @param {Event} e
-   */
-  editorTypeChanged(e) {
-    const select = /** @type HTMLSelectElement */ (e.target);
-    window.localStorage.setItem(editorKey, select.value);
-    window.location.reload();
-  }
 
   _demoTemplate() {
     if (this.initializing) {
       return html`<progress></progress>`;
     }
-    const { value, meta={}, autoEncode, contentType, editorType } = this;
+    const { value, meta={}, autoEncode, contentType } = this;
     const { selected, model } = meta;
     console.log(meta, value);
     return html`
@@ -247,7 +192,6 @@ class ComponentPage extends DemoPage {
         .model="${model}"
         ?autoEncode="${autoEncode}"
         .contentType="${contentType}"
-        .editorType="${editorType}"
         @change="${this.valueChange}"
         @select="${this.selectHandler}"
       ></body-editor>
@@ -267,6 +211,7 @@ class ComponentPage extends DemoPage {
     if (typeof value === 'string') {
       parts.push(String(value));
     } else if (value instanceof Blob) {
+      // @ts-ignore
       parts.push(`[File ${value.name}]`);
     } else if (value instanceof FormData) {
       // @ts-ignore
@@ -290,7 +235,6 @@ class ComponentPage extends DemoPage {
   }
 
   controlsTemplate() {
-    const { editorType } = this;
     return html`
     <section class="documentation-section">
       <h3>State control</h3>
@@ -303,13 +247,6 @@ class ComponentPage extends DemoPage {
           <option value="application/xml">application/xml</option>
           <option value="text/html">text/html</option>
           <option value="text/css">text/css</option>
-        </select>
-      </div>
-      <div>
-        <label id="editorLabel">Raw editor</label>
-        <select @blur="${this.editorTypeChanged}" aria-labelledby="editorLabel">
-          <option ?selected="${editorType === 'Monaco'}" value="Monaco">Monaco</option>
-          <option ?selected="${editorType === 'CodeMirror'}" value="CodeMirror">CodeMirror</option>
         </select>
       </div>
     </section>

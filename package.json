@@ -1,7 +1,7 @@
 {
   "name": "@advanced-rest-client/body-editor",
   "description": "HTTP body editor for a HTTP request made as a web component",
-  "version": "0.1.14",
+  "version": "0.2.0",
   "license": "Apache-2.0",
   "main": "index.js",
   "module": "index.js",
@@ -11,9 +11,10 @@
     "editor",
     "body-editor"
   ],
-  "authors": [
-    "Pawel Psztyc"
-  ],
+  "author": {
+    "name": "Pawel Uchida-Psztyc",
+    "email": "arc@mulesoft.com"
+  },
   "contributors": [
     "Your name can be here!"
   ],
@@ -29,20 +30,18 @@
     "@advanced-rest-client/arc-events": "^0.2.14",
     "@advanced-rest-client/arc-icons": "^3.3.3",
     "@advanced-rest-client/arc-resizable-mixin": "^1.2.1",
-    "@advanced-rest-client/code-mirror": "^3.1.5",
-    "@advanced-rest-client/code-mirror-linter": "^3.0.2",
     "@advanced-rest-client/events-target-mixin": "^3.2.3",
     "@advanced-rest-client/monaco-support": "^1.0.1",
-    "@anypoint-web-components/anypoint-button": "^1.2.0",
+    "@anypoint-web-components/anypoint-button": "^1.2.1",
     "@anypoint-web-components/anypoint-dialog": "^0.1.9",
-    "@anypoint-web-components/anypoint-dropdown-menu": "^0.1.20",
-    "@anypoint-web-components/anypoint-input": "^0.2.24",
-    "@anypoint-web-components/anypoint-item": "^1.1.0",
-    "@anypoint-web-components/anypoint-listbox": "^1.1.6",
-    "@anypoint-web-components/anypoint-switch": "^0.1.7",
+    "@anypoint-web-components/anypoint-dropdown-menu": "^0.1.21",
+    "@anypoint-web-components/anypoint-input": "^0.2.25",
+    "@anypoint-web-components/anypoint-item": "^1.1.2",
+    "@anypoint-web-components/anypoint-listbox": "^1.1.7",
+    "@anypoint-web-components/anypoint-switch": "^0.1.10",
     "lit-element": "^2.5.1",
     "lit-html": "^1.4.1",
-    "monaco-editor": "^0.21.3"
+    "monaco-editor": "^0.24.0"
   },
   "devDependencies": {
     "@advanced-rest-client/arc-data-generator": "^3.1.12",
@@ -51,14 +50,14 @@
     "@open-wc/eslint-config": "^4.3.0",
     "@open-wc/testing": "^2.5.33",
     "@web/dev-server": "^0.1.17",
-    "@web/test-runner": "^0.13.4",
-    "@web/test-runner-playwright": "^0.8.5",
-    "eslint": "^7.26.0",
+    "@web/test-runner": "^0.13.5",
+    "@web/test-runner-playwright": "^0.8.6",
+    "eslint": "^7.27.0",
     "eslint-config-prettier": "^8.3.0",
     "husky": "^6.0.0",
     "lint-staged": "^11.0.0",
-    "sinon": "^10.0.0",
-    "typescript": "^4.2.4",
+    "sinon": "^11.1.1",
+    "typescript": "^4.3.2",
     "typescript-lit-html-plugin": "^0.9.0"
   },
   "scripts": {

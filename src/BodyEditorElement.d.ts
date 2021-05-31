@@ -41,11 +41,8 @@ import {
   invalidMimeTemplate,
   fixableInvalidMimeTemplate,
   autoFixMime,
-  editorTypeValue,
-  codeMirrorTemplate,
   monacoTemplate,
   mimeValue,
-  codeMirrorChangeHandler,
   mainActionsTemplate,
   mimeTypeChangeHandler,
   dropHandler,
@@ -118,16 +115,6 @@ export declare class BodyEditorElement extends ArcResizableMixin(LitElement) {
    */
   contentType: string;
   [contentTypeValue]: string;
-  /** 
-   * The "raw" editor type. Acceptable values are `CodeMirror` and `Monaco`.
-   * The setter ignores other values.
-   * 
-   * Note, both editors requires additional dependencies that needs to be loaded
-   * outside the components. See the demo page sources for an example.
-   * @attribute
-   */
-  editorType: string;
-  [editorTypeValue]: string;
   /** 
    * The list of coma separated names of the editors to enable.
    * This must be the list of `id` values from the available editors.
@@ -232,12 +219,6 @@ export declare class BodyEditorElement extends ArcResizableMixin(LitElement) {
   [rawChangeHandler](e: Event): void;
 
   /**
-   * A handler for the change event dispatched by the `CodeMirror` editor.
-   * Updated the local value, model, and notifies the change.
-   */
-  [codeMirrorChangeHandler](e: Event): void;
-
-  /**
    * A handler for the change event dispatched by the 
    * `multipart` editor.
    * Updated the local value, model, and notifies the change.
@@ -330,12 +311,6 @@ export declare class BodyEditorElement extends ArcResizableMixin(LitElement) {
    * @returns The template for the Monaco editor
    */
   [monacoTemplate](value: string): TemplateResult;
-
-  /**
-   * @param {string} value The editor value
-   * @returns The template for the CodeMirror editor
-   */
-  [codeMirrorTemplate](value: string): TemplateResult;
 
   /**
    * @returns A template for the www-url-form-encoded editor

@@ -22,9 +22,6 @@ import '@anypoint-web-components/anypoint-button/anypoint-icon-button.js';
 import '@advanced-rest-client/arc-icons/arc-icon.js';
 import '@anypoint-web-components/anypoint-dialog/anypoint-dialog.js';
 import '@anypoint-web-components/anypoint-dialog/anypoint-dialog-scrollable.js';
-import '@advanced-rest-client/code-mirror/code-mirror.js';
-// import '@advanced-rest-client/code-mirror-linter/code-mirror-linter.js';
-import linterStyles from '@advanced-rest-client/code-mirror-linter/lint-style.js';
 import { RequestEvents } from '@advanced-rest-client/arc-events';
 import { ArcResizableMixin } from '@advanced-rest-client/arc-resizable-mixin';
 import { BodyProcessor } from './BodyProcessor.js';
@@ -70,11 +67,8 @@ import {
   invalidMimeTemplate,
   fixableInvalidMimeTemplate,
   autoFixMime,
-  editorTypeValue,
-  codeMirrorTemplate,
   monacoTemplate,
   mimeValue,
-  codeMirrorChangeHandler,
   mainActionsTemplate,
   mimeTypeChangeHandler,
   dropHandler,
@@ -93,7 +87,6 @@ import '../body-raw-editor.js';
 /** @typedef {import('@advanced-rest-client/arc-types').RequestBody.MultipartBody} MultipartBody */
 /** @typedef {import('@advanced-rest-client/arc-types').RequestBody.RawBody} RawBody */
 /** @typedef {import('@advanced-rest-client/arc-types').ApiTypes.ApiType} ApiType */
-/** @typedef {import('@advanced-rest-client/code-mirror').CodeMirrorElement} CodeMirrorElement */
 /** @typedef {import('./BodyFormdataEditorElement').BodyFormdataEditorElement} BodyFormdataEditorElement */
 /** @typedef {import('./BodyMultipartEditorElement').BodyMultipartEditorElement} BodyMultipartEditorElement */
 /** @typedef {import('./BodyRawEditorElement').BodyRawEditorElement} BodyRawEditorElement */
@@ -138,7 +131,7 @@ export const editorTypes = Object.freeze([
  */
 export class BodyEditorElement extends ArcResizableMixin(LitElement) {
   static get styles() {
-    return [elementStyles, linterStyles];
+    return [elementStyles];
   }
 
   static get properties() {
@@ -184,14 +177,6 @@ export class BodyEditorElement extends ArcResizableMixin(LitElement) {
        * to detect current language.
        */
       contentType: { type: String },
-      /** 
-       * The "raw" editor type. Acceptable values are `CodeMirror` and `Monaco`.
-       * The setter ignores other values.
-       * 
-       * Note, both editors requires additional dependencies that needs to be loaded
-       * outside the components. See the demo page sources for an example.
-       */
-      editorType: { type: String },
       /** 
        * The list of coma separated names of the editors to enable.
        * This must be the list of `id` values from the available editors.
@@ -277,19 +262,6 @@ export class BodyEditorElement extends ArcResizableMixin(LitElement) {
     this.requestUpdate();
   }
 
-  get editorType() {
-    return this[editorTypeValue];
-  }
-
-  set editorType(value) {
-    const old = this[editorTypeValue];
-    if (old === value) {
-      return;
-    }
-    this[editorTypeValue] = value;
-    this.requestUpdate();
-  }
-
   get types() {
     return this[enabledEditorsValue];
   }
@@ -329,7 +301,6 @@ export class BodyEditorElement extends ArcResizableMixin(LitElement) {
      * @type {BodyMetaModel[]}
      */
     this.model = undefined;
-    this[editorTypeValue] = 'Monaco';
     this[dropHandler] = this[dropHandler].bind(this);
     this[dragOverHandler] = this[dragOverHandler].bind(this);
   }
@@ -518,22 +489,6 @@ export class BodyEditorElement extends ArcResizableMixin(LitElement) {
    */
   [rawChangeHandler](e) {
     const editor = /** @type BodyRawEditorElement */ (e.target);
-    const { value } = editor;
-    this[valueValue] = value;
-    const model = /** @type RawBody[] */ ([{
-      value,
-    }]);
-    this[setMetaModel]('raw', model);
-    this[notifyInput]();
-  }
-
-  /**
-   * A handler for the change event dispatched by the `CodeMirror` editor.
-   * Updated the local value, model, and notifies the change.
-   * @param {Event} e
-   */
-  [codeMirrorChangeHandler](e) {
-    const editor = /** @type CodeMirrorElement */ (e.target);
     const { value } = editor;
     this[valueValue] = value;
     const model = /** @type RawBody[] */ ([{
@@ -860,10 +815,6 @@ export class BodyEditorElement extends ArcResizableMixin(LitElement) {
       const [item] = model;
       value = item.value;
     }
-    const editor = this[editorTypeValue];
-    if (editor === 'CodeMirror') {
-      return this[codeMirrorTemplate](value);
-    }
     return this[monacoTemplate](value);
   }
 
@@ -879,40 +830,6 @@ export class BodyEditorElement extends ArcResizableMixin(LitElement) {
       .contentType="${contentType}"
       @change="${this[rawChangeHandler]}"
     ></body-raw-editor>`;
-  }
-
-  /**
-   * @param {string} value The editor value
-   * @returns {TemplateResult} The template for the CodeMirror editor
-   */
-  [codeMirrorTemplate](value) {
-    /* global CodeMirror */
-    // @ts-ignore
-    if (typeof CodeMirror === 'undefined') {
-      return html`<p>CodeMirror editor is not loaded.</p>`;
-    }
-    const gutters = ["CodeMirror-lint-markers"];
-    const mode = this[mimeValue];
-    let lint;
-    // @ts-ignore
-    if (mode && String(mode).includes('json') && CodeMirror.lint) {
-      // @ts-ignore
-      lint = CodeMirror.lint.json;
-      gutters.push('code-mirror-lint');
-    } else {
-      lint = false;
-    }
-    return html`
-    <code-mirror
-      .mode="${mode}"
-      @value-changed="${this[rawChangeHandler]}"
-      lineNumbers
-      .gutters="${gutters}"
-      .value="${value}"
-      .lint="${lint}"
-      @input="${this[codeMirrorChangeHandler]}"
-    ></code-mirror>
-    `;
   }
 
   /**
