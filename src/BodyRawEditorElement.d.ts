@@ -1,7 +1,7 @@
 import { LitElement, CSSResult, TemplateResult } from 'lit-element';
 import { ArcResizableMixin } from '@advanced-rest-client/arc-resizable-mixin';
 import * as monaco from 'monaco-editor';
-
+import { MonacoSchema } from './types';
 import {
   valueValue,
   monacoInstance,
@@ -34,6 +34,10 @@ export class BodyRawEditorElement extends ArcResizableMixin(LitElement) {
    * @attribute
    */
   contentType: string;
+  /**
+   * A schema validation to be set on the editor.
+   */
+  schemas: MonacoSchema[];
   [changeTimeout]: number;
   [languageValue]: string;
   [contentTypeValue]: string;

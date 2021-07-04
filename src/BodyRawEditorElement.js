@@ -1,3 +1,4 @@
+/* eslint-disable no-plusplus */
 /* eslint-disable no-bitwise */
 /* eslint-disable class-methods-use-this */
 /**
@@ -23,6 +24,7 @@ import elementStyles from './styles/BodyEditor.styles.js';
 /** @typedef {import('monaco-editor').editor.IStandaloneCodeEditor} IStandaloneCodeEditor */
 /** @typedef {import('monaco-editor').editor.IStandaloneEditorConstructionOptions} IStandaloneEditorConstructionOptions */
 /** @typedef {import('monaco-editor').editor.IEditorOptions} IEditorOptions */
+/** @typedef {import('./types').MonacoSchema} MonacoSchema */
 
 /* global monaco */
 
@@ -42,7 +44,14 @@ import {
   resizeHandler,
   refreshEditor,
   refreshDebouncer,
+  modelUri,
+  validationSchemas,
+  getCurrentSchemas,
+  updateEditorSchemas,
+  createDefaultSchema,
 } from './internals.js';
+
+let modelId = 0;
 
 export class BodyRawEditorElement extends ArcResizableMixin(LitElement) {
   static get styles() {
@@ -119,6 +128,25 @@ export class BodyRawEditorElement extends ArcResizableMixin(LitElement) {
    */
   get editor() {
     return this[monacoInstance];
+  }
+
+  /**
+   * @returns {MonacoSchema[]}
+   */
+  get schemas() {
+    return this[validationSchemas];
+  }
+
+  /**
+   * @param {MonacoSchema[]} value
+   */
+  set schemas(value) {
+    const old = this[validationSchemas];
+    if (old === value) {
+      return;
+    }
+    this[validationSchemas] = value;
+    this[updateEditorSchemas](value);
   }
 
   constructor() {
@@ -227,8 +255,13 @@ export class BodyRawEditorElement extends ArcResizableMixin(LitElement) {
   [generateEditorConfig]() {
     const { value='', readOnly } = this;
     const language = this[languageValue];
+    this[modelUri] = monaco.Uri.parse(`http://raw-editor/model${++modelId}.json`);
+    const model = monaco.editor.createModel(value, 'json', this[modelUri]);
 
-    let config = /** IStandaloneEditorConstructionOptions */ ({
+    const schemas = this[getCurrentSchemas]();
+    this[updateEditorSchemas](schemas);
+    
+    let config = /** @type IStandaloneEditorConstructionOptions */ ({
       minimap: {
         enabled: false,
       },
@@ -237,14 +270,46 @@ export class BodyRawEditorElement extends ArcResizableMixin(LitElement) {
       folding: true,
       tabSize: 2,
       detectIndentation: true,
-      value,
+      // value,
       automaticLayout: true,
+      model,
     });
     config = MonacoTheme.assignTheme(monaco, config);
     if (language) {
       config.language = language;
     }
     return config;
+  }
+
+  [getCurrentSchemas]() {
+    const { schemas } = this;
+    if (Array.isArray(schemas) && schemas.length) {
+      schemas[0].fileMatch = [this[modelUri].toString()];
+      return schemas;
+    }
+    return [this[createDefaultSchema]()];
+  }
+
+  [createDefaultSchema]() {
+    const schema = {
+      uri: "http://raw-editor/default-schema.json",
+      fileMatch: [this[modelUri].toString()],
+      schema: {},
+    };
+    return schema;
+  }
+
+  [updateEditorSchemas](schemas) {
+    let value = schemas;
+    if (!Array.isArray(value) || !value.length) {
+      value = this[createDefaultSchema]();
+    } else {
+      value[0] = { ...value[0], fileMatch: [this[modelUri].toString()] };
+    }
+    monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+      validate: true,
+      schemas: value,
+    });
   }
 
   /**

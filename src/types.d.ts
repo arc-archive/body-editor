@@ -4,3 +4,8 @@ export declare interface EditorType {
   title: string;
 }
 export declare type allowedEditors = 'raw' | 'urlEncode' | 'multipart' | 'file';
+
+export interface MonacoSchema {
+  uri: string;
+  schema: any;
+}
