@@ -256,7 +256,7 @@ export class BodyRawEditorElement extends ArcResizableMixin(LitElement) {
     const { value='', readOnly } = this;
     const language = this[languageValue];
     this[modelUri] = monaco.Uri.parse(`http://raw-editor/model${++modelId}.json`);
-    const model = monaco.editor.createModel(value, 'json', this[modelUri]);
+    const model = monaco.editor.createModel(value, language || 'json', this[modelUri]);
 
     const schemas = this[getCurrentSchemas]();
     this[updateEditorSchemas](schemas);
