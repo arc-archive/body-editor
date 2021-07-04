@@ -80,6 +80,7 @@ import {
 import '../body-formdata-editor.js';
 import '../body-multipart-editor.js';
 import '../body-raw-editor.js';
+import { ifProperty } from './directives/if-property.js';
 
 /** @typedef {import('lit-element').TemplateResult} TemplateResult */
 /** @typedef {import('@anypoint-web-components/anypoint-listbox').AnypointListbox} AnypointListbox */
@@ -373,6 +374,7 @@ export class BodyEditorElement extends ArcResizableMixin(LitElement) {
         value = model[0].value;
       }
       this.value = value;
+      this[notifyInput]();
     }
     await this.requestUpdate();
     this.notifyResize();
@@ -844,8 +846,8 @@ export class BodyEditorElement extends ArcResizableMixin(LitElement) {
     return html`
       <body-formdata-editor 
         ?autoEncode="${autoEncode}"
-        .value="${effectiveValue}"
-        .model="${model}"
+        .value="${ifProperty(effectiveValue)}"
+        .model="${ifProperty(model)}"
         @change="${this[urlEncodeChangeHandler]}"
       ></body-formdata-editor>
     `;
@@ -862,8 +864,8 @@ export class BodyEditorElement extends ArcResizableMixin(LitElement) {
     const effectiveValue = model ? undefined : value;
     return html`
       <body-multipart-editor 
-        .value="${effectiveValue}"
-        .model="${model}"
+        .value="${ifProperty(effectiveValue)}"
+        .model="${ifProperty(model)}"
         ?ignoreContentType="${ignoreContentType}"
         @change="${this[multipartChangeHandler]}"
       ></body-multipart-editor>

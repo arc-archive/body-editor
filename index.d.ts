@@ -5,3 +5,4 @@ export { BodyRawEditorElement } from './src/BodyRawEditorElement';
 export { BodyMultipartEditorElement } from './src/BodyMultipartEditorElement';
 export { BodyProcessor } from './src/BodyProcessor';
 export * from './src/UrlEncodeUtils';
+export { ifProperty } from './src/directives/if-property.js';
