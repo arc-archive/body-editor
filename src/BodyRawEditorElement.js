@@ -300,6 +300,10 @@ export class BodyRawEditorElement extends ArcResizableMixin(LitElement) {
   }
 
   [updateEditorSchemas](schemas) {
+    if (!this[modelUri]) {
+      // the editor is not yet ready. This will be called again when it is ready.
+      return;
+    }
     let value = schemas;
     if (!Array.isArray(value) || !value.length) {
       value = this[createDefaultSchema]();
