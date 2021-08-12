@@ -1,6 +1,6 @@
 import { assert, aTimeout, fixture, html, nextFrame } from '@open-wc/testing';
 import sinon from 'sinon';
-import { DataGenerator } from '@advanced-rest-client/arc-data-generator';
+import { ArcMock } from '@advanced-rest-client/arc-data-generator';
 import './monaco-loader.js';
 import '../body-formdata-editor.js'
 import {
@@ -32,7 +32,7 @@ describe('BodyFormdataEditorElement', () => {
     return fixture(html`<body-formdata-editor autoEncode></body-formdata-editor>`);
   }
 
-  const generator = new DataGenerator();
+  const generator = new ArcMock();
 
   describe('Empty state', () => {
     let element = /** @type BodyFormdataEditorElement */ (null);
@@ -208,7 +208,7 @@ describe('BodyFormdataEditorElement', () => {
   describe('values rendering', () => {
     let element = /** @type BodyFormdataEditorElement */ (null);
     beforeEach(async () => {
-      const value = generator.generateUrlEncodedData();
+      const value = generator.http.payload.urlEncoded();
       element = await valueFixture(value);
     });
 
@@ -241,7 +241,7 @@ describe('BodyFormdataEditorElement', () => {
   describe('enable/disable action', () => {
     let element = /** @type BodyFormdataEditorElement */ (null);
     beforeEach(async () => {
-      const value = generator.generateUrlEncodedData();
+      const value = generator.http.payload.urlEncoded();
       element = await valueFixture(value);
     });
 
@@ -299,7 +299,7 @@ describe('BodyFormdataEditorElement', () => {
   describe('removing an item', () => {
     let element = /** @type BodyFormdataEditorElement */ (null);
     beforeEach(async () => {
-      const value = generator.generateUrlEncodedData();
+      const value = generator.http.payload.urlEncoded();
       element = await valueFixture(value);
     });
 
@@ -329,7 +329,7 @@ describe('BodyFormdataEditorElement', () => {
   describe('name change', () => {
     let element = /** @type BodyFormdataEditorElement */ (null);
     beforeEach(async () => {
-      const value = generator.generateUrlEncodedData();
+      const value = generator.http.payload.urlEncoded();
       element = await valueFixture(value);
     });
 
@@ -362,7 +362,7 @@ describe('BodyFormdataEditorElement', () => {
   describe('value change', () => {
     let element = /** @type BodyFormdataEditorElement */ (null);
     beforeEach(async () => {
-      const value = generator.generateUrlEncodedData();
+      const value = generator.http.payload.urlEncoded();
       element = await valueFixture(value);
     });
 
