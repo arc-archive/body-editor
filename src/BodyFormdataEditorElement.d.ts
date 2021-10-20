@@ -25,7 +25,9 @@ import {
   addParamTemplate,
 } from './internals.js';
 
-
+/**
+ * @deprecated Use `@advanced-rest-client/app` instead.
+ */
 export class BodyFormdataEditorElement extends LitElement {
   static readonly styles: CSSResult;
 

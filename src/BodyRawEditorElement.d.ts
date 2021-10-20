@@ -16,6 +16,9 @@ import {
   setEditorConfigProperty,
 } from './internals.js';
 
+/**
+ * @deprecated Use `@advanced-rest-client/app` instead.
+ */
 export class BodyRawEditorElement extends ArcResizableMixin(LitElement) {
   static readonly styles: CSSResult[];
 

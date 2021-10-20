@@ -4,6 +4,7 @@ export const boundaryValue: unique symbol;
 /**
  * A helper class that reads FormData as string and reads 
  * its `boundary` and `contentType`
+ * @deprecated Use `@advanced-rest-client/libs` instead.
  */
 export class MultipartGenerator {
   form: FormData;

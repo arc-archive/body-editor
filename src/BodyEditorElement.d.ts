@@ -58,6 +58,7 @@ export declare type allowedEditors = 'raw' | 'urlEncode' | 'multipart' | 'file';
 
 /**
  * @fires change When the value and the model change
+ * @deprecated Use `@advanced-rest-client/app` instead.
  */
 export declare class BodyEditorElement extends ArcResizableMixin(LitElement) {
   static readonly styles: CSSResult[];

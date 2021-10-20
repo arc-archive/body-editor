@@ -1,4 +1,8 @@
-# ARC body editor
+# Deprecated
+
+This component is deprecated. Use `@advanced-rest-client/app` instead.
+
+----
 
 A module containing the UI regions and the logic to render HTTP body editor.
 

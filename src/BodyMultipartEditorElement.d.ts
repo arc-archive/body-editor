@@ -41,6 +41,7 @@ export const hasFormDataSupport: boolean;
  *
  * It produces a FormData object that can be used in XHR / Fetch or transformed to ArrayBuffer to be
  * used in socket connection.
+ * @deprecated Use `@advanced-rest-client/app` instead.
  */
 export declare class BodyMultipartEditorElement extends LitElement {
   static readonly styles: CSSResult;

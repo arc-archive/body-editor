@@ -7,6 +7,7 @@ import { WebsocketLog, WebsocketRequest } from '@advanced-rest-client/arc-types/
  * datastore or file.
  * It processes `FormData` and `Blob` payloads into string and restores
  * them to original state.
+ * @deprecated Use `@advanced-rest-client/libs` instead.
  */
 export declare class BodyProcessor {
 
